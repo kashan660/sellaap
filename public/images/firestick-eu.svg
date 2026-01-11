@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" fill="none">
+  <rect width="600" height="400" fill="#f8fafc"/>
+  <defs>
+    <linearGradient id="bgEU" x1="0" y1="0" x2="600" y2="400" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#059669"/>
+      <stop offset="1" stop-color="#047857"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#bgEU)" opacity="0.1"/>
+  
+  <!-- Firestick Device -->
+  <rect x="200" y="150" width="200" height="60" rx="10" fill="#1e293b"/>
+  <rect x="180" y="165" width="20" height="30" rx="2" fill="#94a3b8"/>
+
+  <!-- EU Flag Motif -->
+  <circle cx="500" cy="100" r="50" fill="#003399" opacity="0.2"/>
+  <circle cx="500" cy="100" r="30" stroke="#ffcc00" stroke-width="2" stroke-dasharray="5,10" opacity="0.5"/>
+
+  <text x="300" y="300" font-family="Arial" font-weight="bold" font-size="36" fill="#1e293b" text-anchor="middle">Firestick Setup Europe</text>
+  <text x="300" y="340" font-family="Arial" font-size="20" fill="#475569" text-anchor="middle">EU Coverage (FR, DE, ES, IT)</text>
+</svg>

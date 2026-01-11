@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" fill="none">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Icon Mark: Stylized 'S' / Play Button -->
+  <path d="M15 10 C 5 10, 5 25, 15 25 L 25 25 C 35 25, 35 40, 25 40 L 10 40" stroke="url(#logoGradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="35" cy="15" r="4" fill="#7c3aed" />
+  
+  <!-- Text -->
+  <text x="50" y="35" font-family="Arial, sans-serif" font-weight="bold" font-size="32" fill="currentColor">
+    Sell<tspan fill="url(#logoGradient)">aap</tspan>
+  </text>
+</svg>

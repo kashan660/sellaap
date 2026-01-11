@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" fill="none">
+  <rect width="600" height="400" fill="#f8fafc"/>
+  <defs>
+    <linearGradient id="bgIPTV" x1="0" y1="0" x2="600" y2="400" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7c3aed"/>
+      <stop offset="1" stop-color="#6d28d9"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#bgIPTV)" opacity="0.1"/>
+  
+  <!-- Screen Icon -->
+  <rect x="150" y="100" width="300" height="180" rx="10" fill="#1e293b"/>
+  <rect x="160" y="110" width="280" height="160" fill="#0f172a"/>
+  
+  <!-- Play Button -->
+  <circle cx="300" cy="190" r="30" fill="#7c3aed"/>
+  <path d="M310 190 L290 180 V200 Z" fill="white"/>
+
+  <text x="300" y="340" font-family="Arial" font-weight="bold" font-size="36" fill="#1e293b" text-anchor="middle">Premium IPTV</text>
+  <text x="300" y="370" font-family="Arial" font-size="20" fill="#475569" text-anchor="middle">10,000+ Channels & VOD</text>
+</svg>

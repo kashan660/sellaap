@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" fill="none">
+  <rect width="600" height="400" fill="#f8fafc"/>
+  <defs>
+    <linearGradient id="bgVPN" x1="0" y1="0" x2="600" y2="400" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0891b2"/>
+      <stop offset="1" stop-color="#0e7490"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#bgVPN)" opacity="0.1"/>
+  
+  <!-- Shield Icon -->
+  <path d="M300 80 L400 120 V200 C400 280 300 340 300 340 C300 340 200 280 200 200 V120 L300 80 Z" fill="#0891b2" opacity="0.8"/>
+  <path d="M280 200 L300 220 L340 160" stroke="white" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <text x="300" y="380" font-family="Arial" font-weight="bold" font-size="36" fill="#1e293b" text-anchor="middle">Secure VPN</text>
+</svg>
