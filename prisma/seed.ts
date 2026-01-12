@@ -1,26 +1,65 @@
 import { PrismaClient } from '@prisma/client'
 import { blogPosts } from '../src/lib/blogData'
 import { rawProducts } from '../src/data/products'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
   console.log('Start seeding ...')
 
+  // Seed Admin User
+  const adminPassword = await bcrypt.hash('admin123', 10);
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@sellaap.com' },
+    update: {
+      password: adminPassword,
+      role: 'ADMIN',
+      name: 'Admin User'
+    },
+    create: {
+      email: 'admin@sellaap.com',
+      name: 'Admin User',
+      password: adminPassword,
+      role: 'ADMIN'
+    }
+  });
+  console.log(`Created admin user: ${admin.email} (password: admin123)`)
+
   // Seed Products
   for (const p of rawProducts) {
+    let categoryId = null;
+    
+    if (p.category) {
+       const categorySlug = p.category.toLowerCase().replace(/ /g, '-');
+       const category = await prisma.category.upsert({
+         where: { slug: categorySlug },
+         update: {},
+         create: {
+           slug: categorySlug,
+           name: p.category,
+           description: `All ${p.category} products`
+         }
+       });
+       categoryId = category.id;
+    }
+
     const product = await prisma.product.upsert({
       where: { slug: p.slug },
-      update: {},
+      update: {
+        categoryId: categoryId,
+        features: JSON.stringify(["Instant Delivery", "24/7 Support", "High Quality"])
+      },
       create: {
         slug: p.slug,
         name: p.name,
         description: p.description,
         price: p.price,
         currency: p.currency,
-        category: p.category,
+        categoryId: categoryId,
         fallbackImage: p.fallbackImage,
         image: p.image,
+        features: JSON.stringify(["Instant Delivery", "24/7 Support", "High Quality"])
       },
     })
     console.log(`Created product with id: ${product.id}`)

@@ -57,19 +57,24 @@ export default async function Home() {
                           src={product.image || product.fallbackImage} 
                           alt={product.name}
                           fill
-                          unoptimized={!!product.image?.startsWith('http') || !!product.fallbackImage.startsWith('http')}
+                          unoptimized={!!(product.image?.startsWith('http') || product.fallbackImage.startsWith('http'))}
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                        />
                     </div>
                     <div className="p-4 flex flex-col flex-grow">
-                       <h3 className="text-lg font-bold mb-2">{product.name}</h3>
+                       <h3 className="text-lg font-bold mb-2">
+                          <Link href={`/products/${product.slug}`}>
+                              <span aria-hidden="true" className="absolute inset-0" />
+                              {product.name}
+                          </Link>
+                       </h3>
                        <p className="text-muted-foreground text-sm mb-4 flex-grow">{product.description}</p>
-                       <div className="flex justify-between items-center mt-auto">
+                       <div className="flex justify-between items-center mt-auto relative z-10">
                           <span className="text-xl font-bold text-primary">
                             <Price amount={product.price} baseCurrency={product.currency} />
                           </span>
-                          <button className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
+                          <button className="text-sm font-medium text-primary hover:underline flex items-center gap-1 cursor-pointer">
                             Add to Cart <ShoppingCart size={14} />
                           </button>
                        </div>

@@ -12,7 +12,12 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminPage() {
   const products = await prisma.product.findMany({
-    orderBy: { id: 'asc' }
+    orderBy: { id: 'asc' },
+    include: { category: true }
+  });
+  
+  const categories = await prisma.category.findMany({
+    orderBy: { name: 'asc' }
   });
   
   const posts = await prisma.post.findMany({
@@ -24,10 +29,10 @@ export default async function AdminPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
-          <p className="text-muted-foreground mt-2">Manage images for your products and blog posts.</p>
+          <p className="text-muted-foreground mt-2">Manage products, categories, and blog posts.</p>
         </div>
         
-        <AdminDashboard products={products} posts={posts} />
+        <AdminDashboard products={products} posts={posts} categories={categories} />
       </div>
     </div>
   );

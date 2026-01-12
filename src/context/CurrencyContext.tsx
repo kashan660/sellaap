@@ -26,26 +26,43 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const initCurrency = async () => {
+      let userCurrency = 'USD';
+
       try {
         // 1. Get User's Location/Currency
-        // ipapi.co returns a JSON with 'currency' field (e.g., 'GBP', 'EUR')
-        const locationRes = await fetch('https://ipapi.co/json/');
-        const locationData = await locationRes.json();
-        const userCurrency = locationData.currency || 'USD';
-        
-        setCurrency(userCurrency);
+        // using a short timeout to avoid blocking
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
 
-        // 2. Get Exchange Rates
-        // exchangerate-api.com returns rates relative to a base currency (e.g., USD)
-        const ratesRes = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-        const ratesData = await ratesRes.json();
-        
-        if (ratesData && ratesData.rates) {
-          setRates(ratesData.rates);
+        const locationRes = await fetch('https://ipapi.co/json/', { 
+            signal: controller.signal 
+        });
+        clearTimeout(timeoutId);
+
+        if (locationRes.ok) {
+            const locationData = await locationRes.json();
+            userCurrency = locationData.currency || 'USD';
         }
       } catch (error) {
-        console.error("Failed to fetch currency data:", error);
-        // Fallback to USD if anything fails
+        // Silently fail to USD
+        // We use console.debug instead of console.warn/error to avoid scaring users/developers
+        // when ad-blockers (like uBlock Origin) or network issues block the request.
+        console.debug("Currency auto-detection skipped (defaulting to USD):", error);
+      }
+
+      setCurrency(userCurrency);
+
+      try {
+        // 2. Get Exchange Rates
+        const ratesRes = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+        if (ratesRes.ok) {
+            const ratesData = await ratesRes.json();
+            if (ratesData && ratesData.rates) {
+              setRates(ratesData.rates);
+            }
+        }
+      } catch (error) {
+        console.error("Failed to fetch exchange rates:", error);
       } finally {
         setIsLoading(false);
       }

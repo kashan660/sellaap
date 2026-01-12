@@ -5,6 +5,9 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { CurrencyProvider } from "@/context/CurrencyContext";
+import { CartProvider } from "@/context/CartContext";
+import { CartDrawer } from "@/components/CartDrawer";
+import { AuthProvider } from "@/components/providers/SessionProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,14 +35,19 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        <CurrencyProvider>
-          <Navbar />
-          <main className="flex-grow pt-16">
-            {children}
-          </main>
-          <WhatsAppButton />
-          <Footer />
-        </CurrencyProvider>
+        <AuthProvider>
+          <CurrencyProvider>
+            <CartProvider>
+              <Navbar />
+              <CartDrawer />
+              <main className="flex-grow pt-16">
+                {children}
+              </main>
+              <WhatsAppButton />
+              <Footer />
+            </CartProvider>
+          </CurrencyProvider>
+        </AuthProvider>
       </body>
     </html>
   );

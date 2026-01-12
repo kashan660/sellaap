@@ -10,6 +10,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  password      String
+  name          String?
+  mobile        String?
+  role          String    @default("USER") // ADMIN, USER
+  orders        Order[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  slug        String    @unique
+  name        String
+  description String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
 model Product {
   id            Int      @id @default(autoincrement())
   slug          String   @unique
@@ -17,7 +39,15 @@ model Product {
   description   String
   price         Float
   currency      String   @default("USD")
-  category      String?
+  
+  // Relations
+  categoryId    Int?
+  category      Category? @relation(fields: [categoryId], references: [id])
+  orderItems    OrderItem[]
+  
+  // Details
+  features      String? // Stored as JSON string or markdown
+  
   fallbackImage String
   image         String?
   createdAt     DateTime @default(now())
@@ -36,4 +66,51 @@ model Post {
   imageUrl  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id            Int         @id @default(autoincrement())
+  user          User?       @relation(fields: [userId], references: [id])
+  userId        Int?
+  items         OrderItem[]
+  total         Float
+  currency      String      @default("USD")
+  status        String      @default("PENDING") // PENDING, COMPLETED, CANCELLED
+  paymentMethod String?     // PAYPAL, PAYONEER, WISE
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   Int
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+  quantity  Int
+  price     Float
+}
+
+model PaymentSettings {
+  id                Int      @id @default(autoincrement())
+  
+  paypalEmail       String?
+  isPaypalEnabled   Boolean  @default(false)
+  
+  payoneerDetails   String?
+  isPayoneerEnabled Boolean  @default(false)
+  
+  wiseDetails       String?
+  isWiseEnabled     Boolean  @default(false)
+  
+  btcAddress        String?
+  isBtcEnabled      Boolean  @default(false)
+  
+  binancePayId      String?
+  isBinanceEnabled  Boolean  @default(false)
+  
+  usdtAddress       String?
+  isUsdtEnabled     Boolean  @default(false)
+  
+  updatedAt         DateTime @updatedAt
 }
