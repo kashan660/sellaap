@@ -7,9 +7,10 @@ export async function registerUser(prevState: any, formData: FormData) {
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  const mobile = formData.get("mobile") as string;
 
   if (!email || !password) {
-    return { error: "Email and password are required" };
+    return { success: false, error: "Email and password are required" };
   }
 
   try {
@@ -18,7 +19,7 @@ export async function registerUser(prevState: any, formData: FormData) {
     });
 
     if (existingUser) {
-      return { error: "User already exists" };
+      return { success: false, error: "User already exists" };
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -32,9 +33,9 @@ export async function registerUser(prevState: any, formData: FormData) {
       },
     });
 
-    return { success: true };
+    return { success: true, error: "" };
   } catch (error) {
     console.error(error);
-    return { error: "Something went wrong" };
+    return { success: false, error: "Something went wrong" };
   }
 }

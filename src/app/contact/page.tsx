@@ -1,3 +1,4 @@
+'use client';
 
 import { Mail, Phone, MapPin, MessageCircle, Send } from "lucide-react";
 

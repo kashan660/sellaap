@@ -11,11 +11,11 @@ export async function createCategory(formData: FormData) {
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
   try {
-    await prisma.category.create({
+    const category = await prisma.category.create({
       data: { name, slug, description }
     })
     revalidatePath('/admin')
-    return { success: true }
+    return { success: true, data: category }
   } catch (error) {
     console.error('Failed to create category:', error)
     return { success: false, error: 'Failed to create category' }
@@ -45,7 +45,7 @@ export async function createProduct(formData: FormData) {
   const fallbackImage = "https://placehold.co/600x400?text=No+Image" // Default
 
   try {
-    await prisma.product.create({
+    const product = await prisma.product.create({
       data: {
         name,
         slug,
@@ -54,10 +54,13 @@ export async function createProduct(formData: FormData) {
         categoryId: isNaN(categoryId) ? null : categoryId,
         features: features, // simple string storage for now
         fallbackImage
+      },
+      include: {
+        category: true
       }
     })
     revalidatePath('/admin')
-    return { success: true }
+    return { success: true, data: product }
   } catch (error) {
     console.error('Failed to create product:', error)
     return { success: false, error: 'Failed to create product' }
@@ -72,7 +75,7 @@ export async function updateProduct(id: number, formData: FormData) {
   const features = formData.get('features') as string
 
   try {
-    await prisma.product.update({
+    const product = await prisma.product.update({
       where: { id },
       data: {
         name,
@@ -81,10 +84,13 @@ export async function updateProduct(id: number, formData: FormData) {
         currency: 'USD', // Ensure updates also stick to USD base
         categoryId: isNaN(categoryId) ? null : categoryId,
         features
+      },
+      include: {
+        category: true
       }
     })
     revalidatePath('/admin')
-    return { success: true }
+    return { success: true, data: product }
   } catch (error) {
     console.error('Failed to update product:', error)
     return { success: false, error: 'Failed to update product' }
