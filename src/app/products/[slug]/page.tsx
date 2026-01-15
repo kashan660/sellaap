@@ -6,7 +6,7 @@ import { Price } from '@/components/Price';
 import { AddToCartButton } from '@/components/AddToCartButton';
 import { ShoppingCart } from 'lucide-react';
 import { Metadata } from 'next';
-import { generateProductMeta, generateStructuredData } from '@/lib/seo-utils';
+import { generateProductMeta, generateStructuredData, generateFAQStructuredData } from '@/lib/seo-utils';
 
 interface ProductPageProps {
   params: Promise<{

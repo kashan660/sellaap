@@ -2,7 +2,9 @@ import { PrismaClient } from '@prisma/client';
 
 // Check if we're using Prisma Accelerate (cloud database)
 const isAccelerate = process.env.POSTGRES_URL?.includes('prisma-data.net') || 
-                     process.env.DATABASE_URL?.includes('prisma-data.net');
+                     process.env.POSTGRES_URL?.includes('db.prisma.io') ||
+                     process.env.DATABASE_URL?.includes('prisma-data.net') ||
+                     process.env.DATABASE_URL?.includes('db.prisma.io');
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 

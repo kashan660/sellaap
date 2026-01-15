@@ -7,7 +7,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // Use PRISMA_DATABASE_URL for Prisma Accelerate (cloud database)
   url      = env("PRISMA_DATABASE_URL") // Uses connection pooling
   directUrl = env("DIRECT_URL") // Uses direct connection
 }
