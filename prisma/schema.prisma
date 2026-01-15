@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // Uses connection pooling
+  directUrl = env("DIRECT_URL") // Uses direct connection
 }
 
 model User {
@@ -54,6 +55,28 @@ model Product {
   updatedAt     DateTime @updatedAt
 }
 
+model SeoSettings {
+  id                Int      @id @default(autoincrement())
+  siteTitle         String?
+  siteDescription   String?
+  defaultKeywords   String?
+  twitterHandle     String?
+  ogImage           String?
+  googleVerification String?
+  bingVerification  String?
+  updatedAt         DateTime @updatedAt
+}
+
+model PageSeo {
+  id              Int      @id @default(autoincrement())
+  path            String   @unique // e.g., "/", "/contact", "/products"
+  title           String?  // Page Name / Meta Title
+  description     String?
+  keywords        String?
+  ogImage         String?
+  updatedAt       DateTime @updatedAt
+}
+
 model Post {
   id        Int      @id @default(autoincrement())
   slug      String   @unique
@@ -64,6 +87,10 @@ model Post {
   category  String
   keywords  String   // Stored as comma-separated values
   imageUrl  String?
+  
+  metaTitle       String?
+  metaDescription String?
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

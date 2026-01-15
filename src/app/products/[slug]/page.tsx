@@ -25,8 +25,14 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   }
 
   return {
-    title: `${product.name} - Sellaap`,
-    description: product.description,
+    title: product.metaTitle || `${product.name} - Sellaap`,
+    description: product.metaDescription || product.description,
+    keywords: product.metaKeywords ? product.metaKeywords.split(',') : [],
+    openGraph: {
+      title: product.metaTitle || product.name,
+      description: product.metaDescription || product.description,
+      images: product.image ? [product.image] : (product.fallbackImage ? [product.fallbackImage] : []),
+    }
   };
 }
 

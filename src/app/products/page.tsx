@@ -4,11 +4,30 @@ import Image from "next/image";
 import Link from "next/link";
 import { getProducts } from "@/lib/products";
 import { Price } from "@/components/Price";
+import { prisma } from "@/lib/prisma";
 
-export const metadata: Metadata = {
-  title: "Products - Sellaap",
-  description: "Browse our collection of premium Firestick setups and digital goods.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  let pageSeo = null;
+  try {
+      if ((prisma as any).pageSeo) {
+        pageSeo = await prisma.pageSeo.findUnique({ where: { path: '/products' } });
+      }
+  } catch (e) {}
+
+  if (pageSeo) {
+      return {
+          title: pageSeo.title,
+          description: pageSeo.description,
+          keywords: pageSeo.keywords?.split(','),
+          openGraph: pageSeo.ogImage ? { images: [pageSeo.ogImage] } : undefined
+      }
+  }
+
+  return {
+    title: "Products - Sellaap",
+    description: "Browse our collection of premium Firestick setups and digital goods.",
+  };
+}
 
 export default async function ProductsPage() {
   const products = await getProducts();

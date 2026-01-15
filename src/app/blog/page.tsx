@@ -3,32 +3,50 @@ import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 
-export const metadata: Metadata = {
-  title: "Blog - Sellaap",
-  description: "Read our latest guides on Firestick setup, IPTV, and digital goods for UK, USA, and Europe.",
-  keywords: "Firestick setup guide, IPTV tutorial, best Firestick apps, UK TV on Firestick, digital goods blog",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  let pageSeo = null;
+  try {
+      if ((prisma as any).pageSeo) {
+        pageSeo = await prisma.pageSeo.findUnique({ where: { path: '/blog' } });
+      }
+  } catch (e) {}
+
+  if (pageSeo) {
+      return {
+          title: pageSeo.title,
+          description: pageSeo.description,
+          keywords: pageSeo.keywords?.split(','),
+          openGraph: pageSeo.ogImage ? { images: [pageSeo.ogImage] } : undefined
+      }
+  }
+
+  return {
+    title: "Blog - Sellaap",
+    description: "Read our latest guides on Firestick setup, IPTV, and digital goods for UK, USA, and Europe.",
+    keywords: "Firestick setup guide, IPTV tutorial, best Firestick apps, UK TV on Firestick, digital goods blog",
+  };
+}
 
 export default async function BlogPage() {
-  // const blogPosts = await prisma.post.findMany({
-  //   orderBy: { date: 'desc' }
-  // });
+  const blogPosts = await prisma.post.findMany({
+    orderBy: { date: 'desc' }
+  });
 
-  const blogPosts = [
-    {
-      id: 1,
-      slug: "firestick-guide",
-      title: "Ultimate Firestick Guide",
-      excerpt: "Everything you need to know about Firestick.",
-      content: "Content goes here...",
-      date: new Date(),
-      category: "Guides",
-      keywords: "firestick, guide",
-      imageUrl: "https://placehold.co/600x400",
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }
-  ];
+  // const blogPosts = [
+  //   {
+  //     id: 1,
+  //     slug: "firestick-guide",
+  //     title: "Ultimate Firestick Guide",
+  //     excerpt: "Everything you need to know about Firestick.",
+  //     content: "Content goes here...",
+  //     date: new Date(),
+  //     category: "Guides",
+  //     keywords: "firestick, guide",
+  //     imageUrl: "https://placehold.co/600x400",
+  //     createdAt: new Date(),
+  //     updatedAt: new Date()
+  //   }
+  // ];
 
   return (
     <div className="bg-background py-16 sm:py-24">

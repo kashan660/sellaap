@@ -1,6 +1,29 @@
-'use client';
-
 import { Mail, Phone, MapPin, MessageCircle, Send } from "lucide-react";
+import { Metadata } from "next";
+import { prisma } from "@/lib/prisma";
+
+export async function generateMetadata(): Promise<Metadata> {
+  let pageSeo = null;
+  try {
+      if ((prisma as any).pageSeo) {
+        pageSeo = await prisma.pageSeo.findUnique({ where: { path: '/contact' } });
+      }
+  } catch (e) {}
+
+  if (pageSeo) {
+      return {
+          title: pageSeo.title,
+          description: pageSeo.description,
+          keywords: pageSeo.keywords?.split(','),
+          openGraph: pageSeo.ogImage ? { images: [pageSeo.ogImage] } : undefined
+      }
+  }
+
+  return {
+    title: "Contact Us - Sellaap",
+    description: "Get in touch with Sellaap for support regarding Firestick setup and digital goods."
+  };
+}
 
 export default function ContactPage() {
   return (

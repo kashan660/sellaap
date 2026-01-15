@@ -8,17 +8,55 @@ import { revalidatePath } from 'next/cache'
 export async function createCategory(formData: FormData) {
   const name = formData.get('name') as string
   const description = formData.get('description') as string
+  const metaTitle = formData.get('metaTitle') as string
+  const metaDescription = formData.get('metaDescription') as string
+  const metaKeywords = formData.get('metaKeywords') as string
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
   try {
     const category = await prisma.category.create({
-      data: { name, slug, description }
+      data: { 
+        name, 
+        slug, 
+        description,
+        metaTitle,
+        metaDescription,
+        metaKeywords
+      }
     })
     revalidatePath('/admin')
     return { success: true, data: category }
   } catch (error) {
     console.error('Failed to create category:', error)
     return { success: false, error: 'Failed to create category' }
+  }
+}
+
+export async function updateCategory(id: number, formData: FormData) {
+  const name = formData.get('name') as string
+  const description = formData.get('description') as string
+  const metaTitle = formData.get('metaTitle') as string
+  const metaDescription = formData.get('metaDescription') as string
+  const metaKeywords = formData.get('metaKeywords') as string
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+
+  try {
+    const category = await prisma.category.update({
+      where: { id },
+      data: { 
+        name, 
+        slug, 
+        description,
+        metaTitle,
+        metaDescription,
+        metaKeywords
+      }
+    })
+    revalidatePath('/admin')
+    return { success: true, data: category }
+  } catch (error) {
+    console.error('Failed to update category:', error)
+    return { success: false, error: 'Failed to update category' }
   }
 }
 
@@ -41,6 +79,9 @@ export async function createProduct(formData: FormData) {
   const price = parseFloat(formData.get('price') as string)
   const categoryId = parseInt(formData.get('categoryId') as string)
   const features = formData.get('features') as string // Expecting JSON string or newlines
+  const metaTitle = formData.get('metaTitle') as string
+  const metaDescription = formData.get('metaDescription') as string
+  const metaKeywords = formData.get('metaKeywords') as string
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
   const fallbackImage = "https://placehold.co/600x400?text=No+Image" // Default
 
@@ -53,7 +94,10 @@ export async function createProduct(formData: FormData) {
         price,
         categoryId: isNaN(categoryId) ? null : categoryId,
         features: features, // simple string storage for now
-        fallbackImage
+        fallbackImage,
+        metaTitle,
+        metaDescription,
+        metaKeywords
       },
       include: {
         category: true
@@ -73,6 +117,9 @@ export async function updateProduct(id: number, formData: FormData) {
   const price = parseFloat(formData.get('price') as string)
   const categoryId = parseInt(formData.get('categoryId') as string)
   const features = formData.get('features') as string
+  const metaTitle = formData.get('metaTitle') as string
+  const metaDescription = formData.get('metaDescription') as string
+  const metaKeywords = formData.get('metaKeywords') as string
 
   try {
     const product = await prisma.product.update({
@@ -83,7 +130,10 @@ export async function updateProduct(id: number, formData: FormData) {
         price,
         currency: 'USD', // Ensure updates also stick to USD base
         categoryId: isNaN(categoryId) ? null : categoryId,
-        features
+        features,
+        metaTitle,
+        metaDescription,
+        metaKeywords
       },
       include: {
         category: true
@@ -116,6 +166,9 @@ export async function createPost(formData: FormData) {
   const content = formData.get('content') as string
   const category = formData.get('category') as string
   const keywords = formData.get('keywords') as string
+  const metaTitle = formData.get('metaTitle') as string
+  const metaDescription = formData.get('metaDescription') as string
+  const metaKeywords = formData.get('metaKeywords') as string
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
   try {
@@ -127,7 +180,10 @@ export async function createPost(formData: FormData) {
         content,
         category,
         keywords,
-        imageUrl: null
+        imageUrl: null,
+        metaTitle,
+        metaDescription,
+        metaKeywords
       }
     })
     revalidatePath('/admin')
@@ -145,6 +201,9 @@ export async function updatePost(id: number, formData: FormData) {
   const content = formData.get('content') as string
   const category = formData.get('category') as string
   const keywords = formData.get('keywords') as string
+  const metaTitle = formData.get('metaTitle') as string
+  const metaDescription = formData.get('metaDescription') as string
+  const metaKeywords = formData.get('metaKeywords') as string
 
   try {
     const updatedPost = await prisma.post.update({
@@ -154,7 +213,10 @@ export async function updatePost(id: number, formData: FormData) {
         excerpt,
         content,
         category,
-        keywords
+        keywords,
+        metaTitle,
+        metaDescription,
+        metaKeywords
       }
     })
     revalidatePath('/admin')

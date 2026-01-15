@@ -31,15 +31,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${post.title} - Sellaap Blog`,
-    description: post.excerpt,
-    keywords: post.keywords.split(','),
+    title: post.metaTitle || `${post.title} - Sellaap Blog`,
+    description: post.metaDescription || post.excerpt,
+    keywords: (post.metaKeywords || post.keywords).split(','),
     openGraph: {
-      title: post.title,
-      description: post.excerpt,
+      title: post.metaTitle || post.title,
+      description: post.metaDescription || post.excerpt,
       type: "article",
       publishedTime: post.date.toISOString(),
       authors: ["Sellaap Team"],
+      images: post.imageUrl ? [post.imageUrl] : [],
     },
   };
 }
