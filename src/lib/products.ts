@@ -11,20 +11,39 @@ export type ProductWithCategory = Product & { category: Category | null };
  * Otherwise, it falls back to the fallbackImage.
  */
 export async function getProducts(): Promise<ProductWithCategory[]> {
-  const products = await prisma.product.findMany({
-    include: {
-        category: true
-    },
-    orderBy: {
-        id: 'asc'
-    }
-  });
+  // const products = await prisma.product.findMany({
+  //   include: {
+  //       category: true
+  //   },
+  //   orderBy: {
+  //       id: 'asc'
+  //   }
+  // });
   
-  // Map to ensure image property is populated (logic similar to before, but now DB driven)
-  return products.map(product => ({
-    ...product,
-    image: product.image || product.fallbackImage
-  }));
+  // // Map to ensure image property is populated (logic similar to before, but now DB driven)
+  // return products.map(product => ({
+  //   ...product,
+  //   image: product.image || product.fallbackImage
+  // }));
+
+  // Static mock data
+  return [
+    {
+      id: 1,
+      slug: "firestick-setup-uk",
+      name: "Firestick Setup UK",
+      description: "Complete setup for UK Firestick users.",
+      price: 29.99,
+      currency: "GBP",
+      categoryId: 1,
+      category: { id: 1, slug: "setup", name: "Setup", description: "Setup services", createdAt: new Date(), updatedAt: new Date() },
+      features: "[]",
+      fallbackImage: "https://placehold.co/600x400",
+      image: "https://placehold.co/600x400",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+  ];
 }
 
 /**

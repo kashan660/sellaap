@@ -7,11 +7,36 @@ import { Price } from "@/components/Price";
 import { prisma } from "@/lib/prisma";
 
 export default async function Home() {
-  const featuredProducts = await getFeaturedProducts();
-  const latestPosts = await prisma.post.findMany({
-    take: 3,
-    orderBy: { date: 'desc' }
-  });
+  // const featuredProducts = await getFeaturedProducts();
+  // const latestPosts = await prisma.post.findMany({
+  //   take: 3,
+  //   orderBy: { date: 'desc' }
+  // });
+
+  // Mock data for static test
+  const featuredProducts = [
+    {
+        id: 1,
+        slug: "test-product",
+        name: "Test Product",
+        description: "This is a static test product",
+        price: 9.99,
+        currency: "USD",
+        fallbackImage: "https://placehold.co/600x400",
+        image: "https://placehold.co/600x400"
+    }
+  ];
+
+  const latestPosts = [
+    {
+        id: 1,
+        slug: "test-post",
+        title: "Test Post",
+        excerpt: "This is a static test post",
+        date: new Date(),
+        category: "Test"
+    }
+  ];
 
   return (
     <div className="flex flex-col min-h-screen">

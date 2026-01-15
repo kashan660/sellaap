@@ -10,9 +10,25 @@ export const metadata: Metadata = {
 };
 
 export default async function BlogPage() {
-  const blogPosts = await prisma.post.findMany({
-    orderBy: { date: 'desc' }
-  });
+  // const blogPosts = await prisma.post.findMany({
+  //   orderBy: { date: 'desc' }
+  // });
+
+  const blogPosts = [
+    {
+      id: 1,
+      slug: "firestick-guide",
+      title: "Ultimate Firestick Guide",
+      excerpt: "Everything you need to know about Firestick.",
+      content: "Content goes here...",
+      date: new Date(),
+      category: "Guides",
+      keywords: "firestick, guide",
+      imageUrl: "https://placehold.co/600x400",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+  ];
 
   return (
     <div className="bg-background py-16 sm:py-24">
