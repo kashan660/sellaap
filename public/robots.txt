@@ -1,0 +1,91 @@
+# Robots.txt for Sellaap - Firestick Setup Service
+# Allow all major search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://sellaap.vercel.app/sitemap.xml
+
+# Allow crawling of all main content
+Allow: /products
+Allow: /blog
+Allow: /contact
+Allow: /about
+Allow: /uk
+Allow: /us
+Allow: /canada
+Allow: /europe
+Allow: /australia
+
+# Allow crawling of specific content types
+Allow: /uk/products
+Allow: /uk/blog
+Allow: /us/products
+Allow: /us/blog
+Allow: /canada/products
+Allow: /canada/blog
+Allow: /europe/products
+Allow: /europe/blog
+Allow: /australia/products
+Allow: /australia/blog
+
+# Block admin and user-specific areas
+Disallow: /admin
+Disallow: /api/admin
+Disallow: /api/auth
+Disallow: /profile
+Disallow: /checkout
+Disallow: /order
+Disallow: /cart
+Disallow: /user
+Disallow: /users
+Disallow: /login
+Disallow: /register
+
+# Block search results and filters
+Disallow: /*?*sort=
+Disallow: /*?*filter=
+Disallow: /*?*search=
+Disallow: /*?*q=
+Disallow: /*?*page=
+
+# Block specific file types
+Disallow: /*.pdf$
+Disallow: /*.doc$
+Disallow: /*.docx$
+Disallow: /*.xls$
+Disallow: /*.xlsx$
+
+# Allow specific bots
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+# Block specific problematic bots
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: MJ12bot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+# Slow down aggressive crawlers
+User-agent: *
+Crawl-delay: 1

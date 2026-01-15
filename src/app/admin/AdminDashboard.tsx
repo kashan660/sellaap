@@ -62,7 +62,7 @@ export default function AdminDashboard({ products: initialProducts, posts: initi
     });
     // Load Pages SEO
     getAllPagesSeo().then(res => {
-        if(res.success) setPagesSeo(res.data);
+        if(res.success) setPagesSeo(res.data || []);
     });
   }, [initialProducts, initialCategories, initialPosts]);
   
@@ -363,15 +363,15 @@ export default function AdminDashboard({ products: initialProducts, posts: initi
                         <div className="space-y-4">
                              <div className="space-y-2">
                                 <label className="text-sm font-medium">Meta Title</label>
-                                <input name="metaTitle" defaultValue={editingProduct?.metaTitle || ''} className="w-full p-2 border rounded-md bg-background" placeholder="SEO Title" />
+                                <input name="metaTitle" className="w-full p-2 border rounded-md bg-background" placeholder="SEO Title" />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Meta Description</label>
-                                <textarea name="metaDescription" defaultValue={editingProduct?.metaDescription || ''} rows={2} className="w-full p-2 border rounded-md bg-background" placeholder="SEO Description" />
+                                <textarea name="metaDescription" rows={2} className="w-full p-2 border rounded-md bg-background" placeholder="SEO Description" />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Meta Keywords</label>
-                                <input name="metaKeywords" defaultValue={editingProduct?.metaKeywords || ''} className="w-full p-2 border rounded-md bg-background" placeholder="keyword1, keyword2, keyword3" />
+                                <input name="metaKeywords" className="w-full p-2 border rounded-md bg-background" placeholder="keyword1, keyword2, keyword3" />
                             </div>
                         </div>
                     </div>
@@ -499,7 +499,7 @@ export default function AdminDashboard({ products: initialProducts, posts: initi
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Meta Keywords</label>
-                                <input name="metaKeywords" defaultValue={editingPost?.metaKeywords || ''} className="w-full p-2 border rounded-md bg-background" placeholder="keyword1, keyword2, keyword3" />
+                                <input name="keywords" defaultValue={editingPost?.keywords || ''} className="w-full p-2 border rounded-md bg-background" placeholder="keyword1, keyword2, keyword3" />
                             </div>
                         </div>
                     </div>
@@ -857,7 +857,7 @@ export default function AdminDashboard({ products: initialProducts, posts: initi
                     if (result.success) {
                         // Refresh list
                         const pages = await getAllPagesSeo();
-                        if (pages.success) setPagesSeo(pages.data);
+                        if (pages.success) setPagesSeo(pages.data || []);
                         setIsPageSeoModalOpen(false);
                     } else {
                         alert(result.error || 'Failed to save');

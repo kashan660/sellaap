@@ -68,7 +68,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: title,
       description: description,
       images: seoSettings?.ogImage ? [seoSettings.ogImage] : [],
-      creator: seoSettings?.twitterHandle,
+      creator: seoSettings?.twitterHandle || undefined,
     },
     verification: {
       google: seoSettings?.googleVerification,

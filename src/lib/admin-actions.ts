@@ -18,10 +18,7 @@ export async function createCategory(formData: FormData) {
       data: { 
         name, 
         slug, 
-        description,
-        metaTitle,
-        metaDescription,
-        metaKeywords
+        description
       }
     })
     revalidatePath('/admin')
@@ -35,9 +32,6 @@ export async function createCategory(formData: FormData) {
 export async function updateCategory(id: number, formData: FormData) {
   const name = formData.get('name') as string
   const description = formData.get('description') as string
-  const metaTitle = formData.get('metaTitle') as string
-  const metaDescription = formData.get('metaDescription') as string
-  const metaKeywords = formData.get('metaKeywords') as string
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
   try {
@@ -46,10 +40,7 @@ export async function updateCategory(id: number, formData: FormData) {
       data: { 
         name, 
         slug, 
-        description,
-        metaTitle,
-        metaDescription,
-        metaKeywords
+        description
       }
     })
     revalidatePath('/admin')
@@ -79,9 +70,6 @@ export async function createProduct(formData: FormData) {
   const price = parseFloat(formData.get('price') as string)
   const categoryId = parseInt(formData.get('categoryId') as string)
   const features = formData.get('features') as string // Expecting JSON string or newlines
-  const metaTitle = formData.get('metaTitle') as string
-  const metaDescription = formData.get('metaDescription') as string
-  const metaKeywords = formData.get('metaKeywords') as string
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
   const fallbackImage = "https://placehold.co/600x400?text=No+Image" // Default
 
@@ -94,10 +82,7 @@ export async function createProduct(formData: FormData) {
         price,
         categoryId: isNaN(categoryId) ? null : categoryId,
         features: features, // simple string storage for now
-        fallbackImage,
-        metaTitle,
-        metaDescription,
-        metaKeywords
+        fallbackImage
       },
       include: {
         category: true
@@ -117,9 +102,6 @@ export async function updateProduct(id: number, formData: FormData) {
   const price = parseFloat(formData.get('price') as string)
   const categoryId = parseInt(formData.get('categoryId') as string)
   const features = formData.get('features') as string
-  const metaTitle = formData.get('metaTitle') as string
-  const metaDescription = formData.get('metaDescription') as string
-  const metaKeywords = formData.get('metaKeywords') as string
 
   try {
     const product = await prisma.product.update({
@@ -130,10 +112,7 @@ export async function updateProduct(id: number, formData: FormData) {
         price,
         currency: 'USD', // Ensure updates also stick to USD base
         categoryId: isNaN(categoryId) ? null : categoryId,
-        features,
-        metaTitle,
-        metaDescription,
-        metaKeywords
+        features
       },
       include: {
         category: true
@@ -182,8 +161,7 @@ export async function createPost(formData: FormData) {
         keywords,
         imageUrl: null,
         metaTitle,
-        metaDescription,
-        metaKeywords
+        metaDescription
       }
     })
     revalidatePath('/admin')
@@ -203,7 +181,6 @@ export async function updatePost(id: number, formData: FormData) {
   const keywords = formData.get('keywords') as string
   const metaTitle = formData.get('metaTitle') as string
   const metaDescription = formData.get('metaDescription') as string
-  const metaKeywords = formData.get('metaKeywords') as string
 
   try {
     const updatedPost = await prisma.post.update({
@@ -215,8 +192,7 @@ export async function updatePost(id: number, formData: FormData) {
         category,
         keywords,
         metaTitle,
-        metaDescription,
-        metaKeywords
+        metaDescription
       }
     })
     revalidatePath('/admin')

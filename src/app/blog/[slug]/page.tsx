@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: post.metaTitle || `${post.title} - Sellaap Blog`,
     description: post.metaDescription || post.excerpt,
-    keywords: (post.metaKeywords || post.keywords).split(','),
+    keywords: post.keywords.split(','),
     openGraph: {
       title: post.metaTitle || post.title,
       description: post.metaDescription || post.excerpt,

@@ -6,6 +6,7 @@ import { Price } from '@/components/Price';
 import { AddToCartButton } from '@/components/AddToCartButton';
 import { ShoppingCart } from 'lucide-react';
 import { Metadata } from 'next';
+import { generateProductMeta, generateStructuredData } from '@/lib/seo-utils';
 
 interface ProductPageProps {
   params: Promise<{
@@ -24,16 +25,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
     return { title: 'Product Not Found' };
   }
 
-  return {
-    title: product.metaTitle || `${product.name} - Sellaap`,
-    description: product.metaDescription || product.description,
-    keywords: product.metaKeywords ? product.metaKeywords.split(',') : [],
-    openGraph: {
-      title: product.metaTitle || product.name,
-      description: product.metaDescription || product.description,
-      images: product.image ? [product.image] : (product.fallbackImage ? [product.fallbackImage] : []),
-    }
-  };
+  return generateProductMeta(product, 'uk'); // Default to UK, can be made dynamic
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
@@ -64,8 +56,35 @@ export default async function ProductPage({ params }: ProductPageProps) {
       }
   }
 
+  const structuredData = generateStructuredData(product);
+  const faqData = [
+    {
+      question: `How long does ${product.name} setup take?`,
+      answer: `Setup typically takes 30-45 minutes. Our expert technicians will configure everything for optimal performance.`
+    },
+    {
+      question: `Is ${product.name} compatible with my TV?`,
+      answer: `Yes, ${product.name} works with any TV that has an HDMI port. We provide full compatibility support.`
+    },
+    {
+      question: `What channels can I access with ${product.name}?`,
+      answer: `You'll get access to thousands of channels including premium content, sports, movies, and international channels.`
+    },
+    {
+      question: `Do you offer support for ${product.name}?`,
+      answer: `Yes, we provide 24/7 support for all our products. Contact us anytime for assistance.`
+    }
+  ];
+
   return (
     <div className="bg-background min-h-screen py-12">
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([structuredData, generateFAQStructuredData(faqData)])
+        }}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="lg:grid lg:grid-cols-2 lg:gap-x-8 lg:items-start">
           {/* Image Gallery */}
@@ -125,6 +144,19 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <div className="mt-10 flex">
                <AddToCartButton product={product} />
             </div>
+          </div>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="mt-16 max-w-3xl mx-auto">
+          <h2 className="text-2xl font-bold text-center mb-8">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            {faqData.map((faq, index) => (
+              <div key={index} className="bg-card border rounded-lg p-6">
+                <h3 className="font-semibold mb-2">{faq.question}</h3>
+                <p className="text-muted-foreground">{faq.answer}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

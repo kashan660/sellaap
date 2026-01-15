@@ -161,10 +161,6 @@ export default function ContactPage() {
             <button 
               type="submit" 
               className="w-full bg-primary text-primary-foreground font-bold py-3 rounded-md hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
-              onClick={(e) => {
-                e.preventDefault();
-                alert("Thank you for your message! We'll get back to you shortly.");
-              }}
             >
               <Send size={18} />
               Send Message
