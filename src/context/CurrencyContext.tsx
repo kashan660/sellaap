@@ -27,12 +27,13 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initCurrency = async () => {
       let userCurrency = 'USD';
+      let timeoutId: NodeJS.Timeout | null = null;
 
       try {
         // 1. Get User's Location/Currency with better error handling
         // using a short timeout to avoid blocking
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        timeoutId = setTimeout(() => controller.abort(), 5000); // Increased timeout to 5 seconds
 
         const locationRes = await fetch('https://ipapi.co/json/', { 
             signal: controller.signal,
@@ -40,7 +41,11 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
               'Accept': 'application/json',
             }
         });
-        clearTimeout(timeoutId);
+        
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
 
         if (locationRes.ok) {
             const locationData = await locationRes.json();
@@ -57,7 +62,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
           
           // Try to detect from URL or default to USD
           const path = window.location.pathname;
-          const market = Object.keys(marketCurrencies).find(m => path.includes(`/${m}`));
+          const market = Object.keys(marketCurrencies).find(m => path.includes(`/${m}`)) as keyof typeof marketCurrencies | undefined;
           userCurrency = market ? marketCurrencies[market] : 'USD';
         }
       } catch (error) {
@@ -75,10 +80,15 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
         
         try {
           const path = window.location.pathname;
-          const market = Object.keys(marketCurrencies).find(m => path.includes(`/${m}`));
+          const market = Object.keys(marketCurrencies).find(m => path.includes(`/${m}`)) as keyof typeof marketCurrencies | undefined;
           userCurrency = market ? marketCurrencies[market] : 'USD';
         } catch {
           userCurrency = 'USD';
+        }
+      } finally {
+        // Ensure cleanup in case of timeout
+        if (timeoutId) {
+          clearTimeout(timeoutId);
         }
       }
 

@@ -1,84 +1,179 @@
 "use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Tv, Globe, Zap } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, Tv, Globe, Zap, Shield, Clock, Star } from "lucide-react";
 
 export function Hero() {
   return (
-    <div className="relative overflow-hidden bg-background py-16 sm:py-24">
-      <div className="relative">
-        <div className="lg:mx-auto lg:max-w-7xl lg:px-8 lg:grid lg:grid-cols-2 lg:grid-flow-col-dense lg:gap-24">
-          <div className="px-4 max-w-xl mx-auto sm:px-6 lg:py-16 lg:max-w-none lg:mx-0 lg:px-0 flex flex-col justify-center">
+    <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-16 sm:py-24 lg:py-32">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-grid-white/5 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.1))] dark:bg-grid-black/5" />
+      
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="lg:grid lg:grid-cols-12 lg:gap-8 lg:items-center">
+          {/* Content Column */}
+          <div className="lg:col-span-7">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.8 }}
+              className="text-center lg:text-left"
             >
-              <div>
-                <span className="h-12 w-12 rounded-md flex items-center justify-center bg-primary shadow-lg">
-                  <Tv className="h-6 w-6 text-primary-foreground" aria-hidden="true" />
-                </span>
+              {/* Trust Badges */}
+              <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-8">
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-sm text-white/90">
+                  <Shield className="h-4 w-4" />
+                  <span>100% Secure Payments</span>
+                </div>
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-sm text-white/90">
+                  <Star className="h-4 w-4" />
+                  <span>5-Star Rated Service</span>
+                </div>
+                <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-sm text-white/90">
+                  <Clock className="h-4 w-4" />
+                  <span>Instant Delivery</span>
+                </div>
               </div>
-              <div className="mt-6">
-                <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
-                  Unlock the Ultimate <span className="text-primary">Entertainment</span> Experience
-                </h1>
-                <p className="mt-4 text-lg text-muted-foreground">
-                  Premium Firestick setup services tailored for the UK, USA, and Europe. 
-                  Experience seamless streaming and access to unlimited digital goods instantly.
-                </p>
-                <div className="mt-6 flex gap-4">
-                  <Link
-                    href="/products"
-                    className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-primary-foreground bg-primary hover:bg-primary/90 transition-all"
-                  >
-                    Get Started Now
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                  <Link
-                    href="/blog"
-                    className="inline-flex items-center px-6 py-3 border border-input text-base font-medium rounded-md shadow-sm text-foreground bg-background hover:bg-accent hover:text-accent-foreground transition-all"
-                  >
-                    Read Our Blog
-                  </Link>
+
+              {/* Main Heading */}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-6">
+                Premium 
+                <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  Firestick Setup
+                </span>
+                <br />
+                & Digital Goods Marketplace
+              </h1>
+
+              {/* Subheading */}
+              <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto lg:mx-0">
+                Transform your streaming experience with professional Firestick setup services. 
+                Access premium digital goods, streaming apps, and entertainment solutions with 
+                instant delivery across the UK, USA, Europe, Canada, and Australia.
+              </p>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
+                <Link
+                  href="/products"
+                  className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                >
+                  <Tv className="mr-3 h-5 w-5" />
+                  Get Firestick Setup
+                  <ArrowRight className="ml-3 h-5 w-5" />
+                </Link>
+                <Link
+                  href="/digital-goods"
+                  className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-white/10 backdrop-blur-sm rounded-xl hover:bg-white/20 transition-all duration-200 border border-white/20"
+                >
+                  <Zap className="mr-3 h-5 w-5" />
+                  Browse Digital Goods
+                </Link>
+              </div>
+
+              {/* Payment Methods */}
+              <div className="flex flex-wrap justify-center lg:justify-start gap-6 items-center">
+                <span className="text-white/60 text-sm">Secure payments with:</span>
+                <div className="flex gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2">
+                    <Image src="/images/paypal-logo.svg" alt="PayPal" width={60} height={20} className="h-5 w-auto" />
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2">
+                    <Image src="/images/payoneer-logo.svg" alt="Payoneer" width={60} height={20} className="h-5 w-auto" />
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2">
+                    <span className="text-white/80 text-sm font-medium">Direct Vendor</span>
+                  </div>
                 </div>
               </div>
             </motion.div>
           </div>
-          <div className="mt-12 sm:mt-16 lg:mt-0">
-            <div className="pl-4 -mr-48 sm:pl-6 md:-mr-16 lg:px-0 lg:m-0 lg:relative lg:h-full">
-               <motion.div
-                 initial={{ opacity: 0, x: 20 }}
-                 animate={{ opacity: 1, x: 0 }}
-                 transition={{ duration: 0.5, delay: 0.2 }}
-                 className="w-full h-full min-h-[400px] bg-gradient-to-br from-primary/10 to-purple-500/10 rounded-2xl flex items-center justify-center p-8 relative overflow-hidden border border-border/50"
-               >
-                  <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:bg-grid-black/10" />
+
+          {/* Visual Column */}
+          <div className="lg:col-span-5 mt-12 lg:mt-0">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="relative"
+            >
+              {/* Main Device Image */}
+              <div className="relative mx-auto max-w-md lg:max-w-full">
+                <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                  <Image
+                    src="/images/firestick-hero-device.jpg"
+                    alt="Amazon Firestick 4K Max with premium streaming apps installed - Professional setup service"
+                    width={600}
+                    height={400}
+                    className="w-full h-auto object-cover"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   
-                  {/* Abstract Visual Representation */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
-                     <motion.div 
-                        whileHover={{ scale: 1.05 }}
-                        className="bg-card p-6 rounded-xl shadow-xl flex flex-col items-center border border-border"
-                     >
-                        <Globe className="h-12 w-12 text-blue-500 mb-3" />
-                        <span className="font-bold text-lg">Global Coverage</span>
-                        <span className="text-sm text-muted-foreground text-center">Optimized for UK, USA & Europe</span>
-                     </motion.div>
-                     <motion.div 
-                        whileHover={{ scale: 1.05 }}
-                        className="bg-card p-6 rounded-xl shadow-xl flex flex-col items-center border border-border mt-0 sm:mt-12"
-                     >
-                        <Zap className="h-12 w-12 text-yellow-500 mb-3" />
-                        <span className="font-bold text-lg">Instant Setup</span>
-                        <span className="text-sm text-muted-foreground text-center">Plug & Play Configuration</span>
-                     </motion.div>
-                  </div>
-               </motion.div>
-            </div>
+                  {/* Floating Elements */}
+                  <motion.div
+                    animate={{ y: [0, -10, 0] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                    className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                      <span className="text-sm font-semibold text-gray-800">Live Setup</span>
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* App Icons Grid */}
+                <div className="absolute -bottom-6 -right-6 grid grid-cols-2 gap-3">
+                  {[
+                    { name: 'Netflix', icon: '/images/netflix-icon.png', color: 'bg-red-600' },
+                    { name: 'Disney+', icon: '/images/disney-icon.png', color: 'bg-blue-600' },
+                    { name: 'Prime Video', icon: '/images/prime-icon.png', color: 'bg-blue-500' },
+                    { name: 'Spotify', icon: '/images/spotify-icon.png', color: 'bg-green-600' }
+                  ].map((app, index) => (
+                    <motion.div
+                      key={app.name}
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.5 + index * 0.1 }}
+                      className={`w-16 h-16 ${app.color} rounded-xl flex items-center justify-center shadow-lg hover:scale-110 transition-transform cursor-pointer`}
+                      title={`${app.name} - Available with our setup`}
+                    >
+                      <Image
+                        src={app.icon}
+                        alt={`${app.name} streaming app icon`}
+                        width={24}
+                        height={24}
+                        className="w-6 h-6"
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Stats Card */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+                className="absolute -top-6 -left-6 bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-xl"
+              >
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">50K+</div>
+                  <div className="text-sm text-gray-600">Happy Customers</div>
+                </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

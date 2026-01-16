@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   
   const meta = generateLocationMeta(location);
-  const hreflangTags = generateHreflangTags('/', validLocations);
+  const hreflangTags = generateHreflangTags('/', [...validLocations]);
   
   return {
     title: meta.title,

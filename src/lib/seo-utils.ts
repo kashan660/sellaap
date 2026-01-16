@@ -21,7 +21,7 @@ export function generateProductMeta(product: any, location: Market = 'uk') {
     openGraph: {
       title: `${product.name} - Professional Firestick Setup Service`,
       description: `${contentTemplates.metaDescriptions[location]} Get ${product.name} with lifetime support.`,
-      type: 'product',
+      type: 'website',
       images: product.image ? [product.image] : [product.fallbackImage],
       siteName: 'Sellaap',
       locale: getLocale(location),
