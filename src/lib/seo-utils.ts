@@ -93,6 +93,11 @@ export function generateFAQStructuredData(faqs: Array<{question: string, answer:
   };
 }
 
+// Generate structured data (alias for generateProductStructuredData)
+export function generateStructuredData(product: any, location: Market = 'uk') {
+  return generateProductStructuredData(product, location);
+}
+
 // Generate blog post meta tags
 export function generateBlogMeta(post: any, location: Market = 'uk') {
   const locationKeywords = seoKeywords[location];
