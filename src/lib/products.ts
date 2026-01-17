@@ -56,3 +56,27 @@ export async function getFeaturedProducts(limit = 3): Promise<ProductWithCategor
     const featuredIds = [1, 4, 5];
     return products.filter(p => featuredIds.includes(p.id));
 }
+
+/**
+ * Fetches digital products (products in the 'digital' category)
+ */
+export async function getDigitalProducts(): Promise<ProductWithCategory[]> {
+  const products = await prisma.product.findMany({
+    where: {
+      category: {
+        slug: 'digital'
+      }
+    },
+    include: {
+        category: true
+    },
+    orderBy: {
+        id: 'asc'
+    }
+  });
+  
+  return products.map(product => ({
+    ...product,
+    image: product.image || product.fallbackImage
+  }));
+}

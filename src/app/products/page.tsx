@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getProducts } from "@/lib/products";
 import { Price } from "@/components/Price";
 import { prisma } from "@/lib/prisma";
+import { AddToCartButton } from "@/components/AddToCartButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   let pageSeo = null;
@@ -75,10 +76,7 @@ export default async function ProductsPage() {
                  <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
               </div>
               <div className="mt-auto p-4 pt-0 relative z-10">
-                  <button className="w-full bg-primary text-primary-foreground py-2 px-4 rounded-md hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer">
-                     <ShoppingCart size={16} />
-                     Add to Cart
-                  </button>
+                  <AddToCartButton product={product} />
               </div>
             </div>
           ))}

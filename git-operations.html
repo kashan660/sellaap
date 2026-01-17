@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Operations - Sellaap</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .instructions {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #2196F3;
+        }
+        .command-box {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .button-secondary {
+            background: #6c757d;
+        }
+        .button-secondary:hover {
+            background: #545b62;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Git Operations for Sellaap</h1>
+        
+        <div class="instructions">
+            <strong>📋 Instructions:</strong> Choose one of the methods below to push your changes to Git. 
+            The batch files contain all the necessary Git commands with proper commit messages.
+        </div>
+
+        <h2>Method 1: Batch Files (Recommended)</h2>
+        <p>Double-click these files in Windows Explorer:</p>
+        
+        <div class="command-box">
+            📁 git-status.bat - Check current Git status<br>
+            📁 git-commit-push.bat - Add, commit, and push all changes
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="#" onclick="runBatchFile('git-status.bat')" class="button button-secondary">Check Status</a>
+            <a href="#" onclick="runBatchFile('git-commit-push.bat')" class="button">Commit & Push</a>
+        </div>
+
+        <h2>Method 2: PowerShell</h2>
+        <p>Open PowerShell and run:</p>
+        <div class="command-box">
+            .\git-commit-push.ps1
+        </div>
+
+        <h2>Method 3: Manual Git Commands</h2>
+        <p>If you prefer to run commands manually:</p>
+        
+        <div class="command-box">
+            git add .<br>
+            git commit -m "feat: Add comprehensive Firestick blog post with regional pricing
+            <br><br>
+            - Created detailed blog post highlighting Sellaap as affordable Firestick provider<br>
+            - Added price comparisons for Europe (€59 vs €200-350), UK (£49 vs £180-300), US ($69 vs $250-400)<br>
+            - Included 5 realistic images showcasing services and savings<br>
+            - Added customer testimonials with specific savings amounts<br>
+            - Integrated cross-selling for digital products<br>
+            - Implemented SEO metadata with schema.org structured data<br>
+            - Created API endpoint for blog post database integration<br>
+            - Fixed Hero section link to digital products<br>
+            - Added comprehensive FAQ section targeting high-cost payers<br>
+            <br>
+            Blog post targets customers seeking affordable Firestick setup services<br>
+            across Europe, UK, and US markets with 70% savings messaging."<br>
+            git push origin main
+        </div>
+
+        <div class="warning">
+            ⚠️ <strong>Note:</strong> Make sure you have Git configured with your credentials and the remote repository is properly set up.
+        </div>
+
+        <h2>Method 4: GitHub Desktop</h2>
+        <p>If you have GitHub Desktop installed:</p>
+        <ol>
+            <li>Open GitHub Desktop</li>
+            <li>Select the Sellaap repository</li>
+            <li>Review the changes in the "Changes" tab</li>
+            <li>Add a commit message (copy from above)</li>
+            <li>Click "Commit to main"</li>
+            <li>Click "Push origin"</li>
+        </ol>
+    </div>
+
+    <script>
+        function runBatchFile(filename) {
+            // This will attempt to run the batch file
+            // Note: Modern browsers may block this for security reasons
+            try {
+                const link = document.createElement('a');
+                link.href = filename;
+                link.download = filename;
+                link.click();
+                alert('Attempted to run ' + filename + '. If it doesn\'t execute automatically, please double-click the file in Windows Explorer.');
+            } catch (error) {
+                alert('Could not automatically run the batch file. Please double-click ' + filename + ' in Windows Explorer.');
+            }
+        }
+    </script>
+</body>
+</html>

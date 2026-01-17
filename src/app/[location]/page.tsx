@@ -5,6 +5,7 @@ import { seoKeywords, blogTopics } from '@/data/seo-keywords';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { ArrowRight, Globe, Shield, Clock, Star, CheckCircle } from 'lucide-react';
+import { AddToCartButton } from '@/components/AddToCartButton';
 
 // Valid locations for SEO
 const validLocations = ['uk', 'us', 'canada', 'europe', 'australia'] as const;
@@ -256,7 +257,7 @@ export default async function LocationPage({ params }: Props) {
                   <div className="p-6">
                     <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
                     <p className="text-muted-foreground mb-4 line-clamp-2">{product.description}</p>
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center mb-4">
                       <span className="text-2xl font-bold text-primary">${product.price}</span>
                       <Link 
                         href={`/${location}/products/${product.slug}`}
@@ -265,6 +266,7 @@ export default async function LocationPage({ params }: Props) {
                         View Details
                       </Link>
                     </div>
+                    <AddToCartButton product={product} />
                   </div>
                 </div>
               ))}

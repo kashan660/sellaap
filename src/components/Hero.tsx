@@ -49,13 +49,13 @@ export function Hero() {
                   Firestick Setup
                 </span>
                 <br />
-                & Digital Goods Marketplace
+                & Digital Products Marketplace
               </h1>
 
               {/* Subheading */}
               <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto lg:mx-0">
                 Transform your streaming experience with professional Firestick setup services. 
-                Access premium digital goods, streaming apps, and entertainment solutions with 
+                Access premium digital products, software licenses, streaming apps, and entertainment solutions with 
                 instant delivery across the UK, USA, Europe, Canada, and Australia.
               </p>
 
@@ -70,13 +70,44 @@ export function Hero() {
                   <ArrowRight className="ml-3 h-5 w-5" />
                 </Link>
                 <Link
-                  href="/digital-goods"
+                  href="/digital-products"
                   className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-white/10 backdrop-blur-sm rounded-xl hover:bg-white/20 transition-all duration-200 border border-white/20"
                 >
                   <Zap className="mr-3 h-5 w-5" />
-                  Browse Digital Goods
+                  Browse Digital Products
                 </Link>
               </div>
+
+              {/* Digital Products Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="mt-8 p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">Digital Products</h3>
+                  <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-semibold">Instant Delivery</span>
+                </div>
+                <p className="text-white/80 mb-4">
+                  Premium software, digital goods, and streaming solutions delivered instantly to your inbox.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/digital-products"
+                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all text-sm font-medium"
+                  >
+                    Browse Digital Products
+                  </Link>
+                  <div className="flex items-center gap-2 text-white/70 text-sm">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    50+ Digital Products Available
+                  </div>
+                </div>
+              </motion.div>
 
               {/* Payment Methods */}
               <div className="flex flex-wrap justify-center lg:justify-start gap-6 items-center">
@@ -108,11 +139,11 @@ export function Hero() {
               <div className="relative mx-auto max-w-md lg:max-w-full">
                 <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                   <Image
-                    src="/images/firestick-hero-device.jpg"
-                    alt="Amazon Firestick 4K Max with premium streaming apps installed - Professional setup service"
+                    src="/images/firestick-usa.svg"
+                    alt="Premium Firestick Setup Service - Professional streaming device configuration with all major apps"
                     width={600}
                     height={400}
-                    className="w-full h-auto object-cover"
+                    className="w-full h-auto object-contain p-4"
                     priority
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
@@ -121,11 +152,11 @@ export function Hero() {
                   <motion.div
                     animate={{ y: [0, -10, 0] }}
                     transition={{ duration: 3, repeat: Infinity }}
-                    className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg p-3"
+                    className="absolute top-4 right-4 bg-gradient-to-r from-green-500 to-green-600 backdrop-blur-sm rounded-lg p-3 border border-white/20"
                   >
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                      <span className="text-sm font-semibold text-gray-800">Live Setup</span>
+                      <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse" />
+                      <span className="text-sm font-semibold text-white">Instant Setup</span>
                     </div>
                   </motion.div>
                 </div>
@@ -133,26 +164,20 @@ export function Hero() {
                 {/* App Icons Grid */}
                 <div className="absolute -bottom-6 -right-6 grid grid-cols-2 gap-3">
                   {[
-                    { name: 'Netflix', icon: '/images/netflix-icon.png', color: 'bg-red-600' },
-                    { name: 'Disney+', icon: '/images/disney-icon.png', color: 'bg-blue-600' },
-                    { name: 'Prime Video', icon: '/images/prime-icon.png', color: 'bg-blue-500' },
-                    { name: 'Spotify', icon: '/images/spotify-icon.png', color: 'bg-green-600' }
+                    { name: 'Netflix', icon: 'N', color: 'bg-red-600', gradient: 'from-red-600 to-red-700' },
+                    { name: 'Disney+', icon: 'D+', color: 'bg-blue-600', gradient: 'from-blue-600 to-blue-700' },
+                    { name: 'Prime Video', icon: 'PV', color: 'bg-blue-500', gradient: 'from-blue-500 to-blue-600' },
+                    { name: 'Spotify', icon: 'S', color: 'bg-green-600', gradient: 'from-green-600 to-green-700' }
                   ].map((app, index) => (
                     <motion.div
                       key={app.name}
                       initial={{ opacity: 0, scale: 0 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.5 + index * 0.1 }}
-                      className={`w-16 h-16 ${app.color} rounded-xl flex items-center justify-center shadow-lg hover:scale-110 transition-transform cursor-pointer`}
+                      className={`w-16 h-16 bg-gradient-to-br ${app.gradient} rounded-xl flex items-center justify-center shadow-lg hover:scale-110 transition-transform cursor-pointer border-2 border-white/20`}
                       title={`${app.name} - Available with our setup`}
                     >
-                      <Image
-                        src={app.icon}
-                        alt={`${app.name} streaming app icon`}
-                        width={24}
-                        height={24}
-                        className="w-6 h-6"
-                      />
+                      <span className="text-white font-bold text-sm">{app.icon}</span>
                     </motion.div>
                   ))}
                 </div>
@@ -166,7 +191,7 @@ export function Hero() {
                 className="absolute -top-6 -left-6 bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-xl"
               >
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">50K+</div>
+                  <div className="text-2xl font-bold text-gray-900">2K+</div>
                   <div className="text-sm text-gray-600">Happy Customers</div>
                 </div>
               </motion.div>
