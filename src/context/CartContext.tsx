@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { Product } from '@prisma/client';
 
 export type CartItem = {
   id: number;
@@ -14,7 +15,7 @@ export type CartItem = {
 
 type CartContextType = {
   items: CartItem[];
-  addItem: (product: any) => void;
+  addItem: (product: Product) => void;
   removeItem: (id: number) => void;
   updateQuantity: (id: number, quantity: number) => void;
   clearCart: () => void;
@@ -51,7 +52,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, isLoaded]);
 
-  const addItem = (product: any) => {
+  const addItem = (product: Product) => {
     setItems((prev) => {
       const existing = prev.find((item) => item.id === product.id);
       if (existing) {
@@ -67,7 +68,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           name: product.name,
           price: product.price,
           currency: product.currency,
-          image: product.image || product.fallbackImage,
+          image: product.image || '/placeholder.png',
           quantity: 1
       }];
     });

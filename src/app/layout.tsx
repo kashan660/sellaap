@@ -8,6 +8,7 @@ import { CurrencyProvider } from "@/context/CurrencyContext";
 import { CartProvider } from "@/context/CartContext";
 import { CartDrawer } from "@/components/CartDrawer";
 import { AuthProvider } from "@/components/providers/SessionProvider";
+import { LanguageProvider } from "@/context/LanguageContext";
 import { prisma } from "@/lib/prisma";
 
 const geistSans = Geist({
@@ -90,17 +91,19 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <AuthProvider>
-          <CurrencyProvider>
-            <CartProvider>
-              <Navbar />
-              <CartDrawer />
-              <main className="flex-grow pt-16">
-                {children}
-              </main>
-              <WhatsAppButton />
-              <Footer />
-            </CartProvider>
-          </CurrencyProvider>
+          <LanguageProvider>
+            <CurrencyProvider>
+              <CartProvider>
+                <Navbar />
+                <CartDrawer />
+                <main className="flex-grow pt-16">
+                  {children}
+                </main>
+                <WhatsAppButton />
+                <Footer />
+              </CartProvider>
+            </CurrencyProvider>
+          </LanguageProvider>
         </AuthProvider>
       </body>
     </html>

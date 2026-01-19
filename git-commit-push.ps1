@@ -40,7 +40,6 @@ feat: Add comprehensive Firestick blog post with regional pricing
 Blog post targets customers seeking affordable Firestick setup services
 across Europe, UK, and US markets with 70% savings messaging.
 "@
-
 git commit -m $commitMessage
 Write-Host ""
 

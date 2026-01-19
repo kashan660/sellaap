@@ -1,8 +1,4 @@
 @echo off
-echo Current Git Status:
+echo Checking git status...
 git status
-echo.
-echo Recent commits:
-git log --oneline -5
-echo.
 pause

@@ -63,6 +63,32 @@ async function main() {
       },
     })
     console.log(`Created product with id: ${product.id}`)
+
+    // Add regional availability for all target markets
+    const regions = ['uk', 'us', 'canada', 'europe', 'australia'];
+    for (const region of regions) {
+      await prisma.productRegion.upsert({
+        where: {
+          productId_region: {
+            productId: product.id,
+            region: region
+          }
+        },
+        update: {
+          available: true,
+          price: p.price, // Use same price for all regions initially
+          currency: p.currency // Use same currency initially
+        },
+        create: {
+          productId: product.id,
+          region: region,
+          available: true,
+          price: p.price,
+          currency: p.currency
+        }
+      });
+    }
+    console.log(`Added regional availability for product: ${product.name}`)
   }
 
   // Seed Posts

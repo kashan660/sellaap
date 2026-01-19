@@ -4,6 +4,7 @@ import Image from "next/image";
 import { ArrowRight, CheckCircle, ShoppingCart } from "lucide-react";
 import { getFeaturedProducts } from "@/lib/products";
 import { Price } from "@/components/Price";
+import { AddToCartButton } from "@/components/AddToCartButton";
 import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 
@@ -288,9 +289,7 @@ export default async function Home() {
                              </span>
                              <span className="text-xs text-muted-foreground">Instant delivery</span>
                           </div>
-                          <button className="bg-primary text-primary-foreground px-3 py-2 sm:px-4 sm:py-2 lg:px-5 lg:py-2.5 rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center gap-1 sm:gap-2 cursor-pointer text-sm lg:text-base hover:scale-105 transform transition-transform duration-200">
-                             Add to Cart <ShoppingCart size={14} className="sm:h-4 sm:w-4 lg:h-5 lg:w-5" />
-                          </button>
+                          <AddToCartButton product={product} />
                        </footer>
                     </div>
                  </article>

@@ -555,7 +555,7 @@ export default async function AffordableFirestickBlog() {
                   <div key={product.id} className="bg-background p-6 rounded-xl border border-border hover:shadow-lg transition-shadow">
                     <div className="flex items-center justify-between mb-4">
                       <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
-                        {product.category.name}
+                        {product.category?.name || 'Digital Product'}
                       </span>
                       <span className="text-2xl font-bold text-green-600">
                         {product.price === 0 ? 'Free' : `€${product.price}`}

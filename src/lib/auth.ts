@@ -53,6 +53,14 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // If it's an admin trying to access admin routes, allow it
+      if (url.startsWith('/admin')) {
+        return url;
+      }
+      // Otherwise, use the default redirect behavior
+      return url.startsWith(baseUrl) ? url : baseUrl;
+    },
     async session({ token, session }) {
       if (token) {
         session.user.id = token.id as string;
@@ -60,12 +68,14 @@ export const authOptions: NextAuthOptions = {
         session.user.email = token.email;
         session.user.role = token.role as string;
       }
+      console.log('Session callback - token role:', token.role, 'session user role:', session.user?.role);
       return session;
     },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        console.log('JWT callback - setting role:', user.role);
       }
       return token;
     },

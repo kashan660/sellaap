@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { createProductWithAddToCart, updateProductWithAddToCart } from '@/lib/product-utils'
 
 // --- Category Actions ---
 
@@ -70,29 +71,30 @@ export async function createProduct(formData: FormData) {
   const price = parseFloat(formData.get('price') as string)
   const categoryId = parseInt(formData.get('categoryId') as string)
   const features = formData.get('features') as string // Expecting JSON string or newlines
+  const image = formData.get('image') as string // Optional image URL
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
   const fallbackImage = "https://placehold.co/600x400?text=No+Image" // Default
 
   try {
-    const product = await prisma.product.create({
-      data: {
-        name,
-        slug,
-        description,
-        price,
-        categoryId: isNaN(categoryId) ? null : categoryId,
-        features: features, // simple string storage for now
-        fallbackImage
-      },
-      include: {
-        category: true
-      }
+    // Use the new AddToCart-enabled product creation
+    const product = await createProductWithAddToCart({
+      name,
+      slug,
+      description,
+      price,
+      categoryId: isNaN(categoryId) ? undefined : categoryId,
+      features: features || JSON.stringify(["Instant Delivery", "24/7 Support"]),
+      image: image || undefined,
+      fallbackImage
     })
+    
     revalidatePath('/admin')
+    revalidatePath('/products')
+    revalidatePath('/digital-products')
     return { success: true, data: product }
   } catch (error) {
-    console.error('Failed to create product:', error)
-    return { success: false, error: 'Failed to create product' }
+    console.error('Failed to create product with AddToCart:', error)
+    return { success: false, error: 'Failed to create product with AddToCart functionality' }
   }
 }
 
@@ -104,25 +106,22 @@ export async function updateProduct(id: number, formData: FormData) {
   const features = formData.get('features') as string
 
   try {
-    const product = await prisma.product.update({
-      where: { id },
-      data: {
-        name,
-        description,
-        price,
-        currency: 'USD', // Ensure updates also stick to USD base
-        categoryId: isNaN(categoryId) ? null : categoryId,
-        features
-      },
-      include: {
-        category: true
-      }
+    // Use the new AddToCart-enabled product update
+    const product = await updateProductWithAddToCart(id, {
+      name,
+      description,
+      price,
+      categoryId: isNaN(categoryId) ? undefined : categoryId,
+      features
     })
+    
     revalidatePath('/admin')
+    revalidatePath('/products')
+    revalidatePath('/digital-products')
     return { success: true, data: product }
   } catch (error) {
-    console.error('Failed to update product:', error)
-    return { success: false, error: 'Failed to update product' }
+    console.error('Failed to update product with AddToCart:', error)
+    return { success: false, error: 'Failed to update product with AddToCart functionality' }
   }
 }
 

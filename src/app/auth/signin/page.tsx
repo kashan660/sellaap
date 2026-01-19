@@ -1,12 +1,13 @@
 'use client';
 
-import { signIn } from "next-auth/react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { signIn, getSession } from "next-auth/react";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function SignInPage() {
+function SignInForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -19,6 +20,9 @@ export default function SignInPage() {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
+    // Try to get the callback URL from search params or default to profile
+    const callbackUrl = searchParams.get('callbackUrl') || '/profile';
+    
     const res = await signIn("credentials", {
       email,
       password,
@@ -29,19 +33,10 @@ export default function SignInPage() {
       setError("Invalid email or password");
       setLoading(false);
     } else {
-      // Get user session to check role
-      const sessionRes = await fetch('/api/auth/session');
-      if (sessionRes.ok) {
-        const session = await sessionRes.json();
-        if (session.user?.role === 'admin') {
-          router.push("/admin");
-        } else {
-          router.push("/profile");
-        }
-      } else {
-        router.push("/profile");
-      }
-      router.refresh();
+      console.log('Login successful, redirecting to auth check...');
+      
+      // Redirect to a page that will check user role and redirect appropriately
+      window.location.href = '/auth/check-role';
     }
   }
 
@@ -94,5 +89,17 @@ export default function SignInPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-muted/50">
+      <div className="w-full max-w-md bg-card p-8 rounded-lg border shadow-sm">
+        <h1 className="text-2xl font-bold mb-6 text-center">Loading...</h1>
+      </div>
+    </div>}>
+      <SignInForm />
+    </Suspense>
   );
 }

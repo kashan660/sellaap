@@ -1,10 +1,12 @@
 'use client';
 
 import { useCurrency } from "@/context/CurrencyContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { Globe } from "lucide-react";
 
 export function CurrencySelector() {
   const { currency, setCurrency, rates } = useCurrency();
+  const { t } = useLanguage();
   
   // Get available currencies from rates
   const currencies = Object.keys(rates).sort();

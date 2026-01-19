@@ -14,7 +14,7 @@ try {
     
 } catch (error) {
     console.log('❌ Prisma generate failed - this indicates environment variable issues');
-    console.log('Error:', error.message);
+    console.log('Error:', error instanceof Error ? error.message : String(error));
     console.log('\n💡 Solution: Ensure these environment variables are set in Vercel:');
     console.log('   - DATABASE_URL');
     console.log('   - DIRECT_URL');

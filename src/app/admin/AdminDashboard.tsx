@@ -5,6 +5,7 @@ import { Product, Post, Category } from '@prisma/client';
 import { updateProductImage, updatePostImage } from '@/lib/actions';
 import { 
     createCategory, 
+    updateCategory,
     deleteCategory, 
     createProduct, 
     deleteProduct, 
@@ -73,8 +74,10 @@ export default function AdminDashboard({ products: initialProducts, posts: initi
   const [isPageSeoModalOpen, setIsPageSeoModalOpen] = useState(false);
   
   const [editingProduct, setEditingProduct] = useState<(Product & { category: Category | null }) | null>(null);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [editingPageSeo, setEditingPageSeo] = useState<any>(null);
+  const [productImageUrl, setProductImageUrl] = useState<string>('');
 
   const handleProductImageUpdate = async (id: number, url: string) => {
     const result = await updateProductImage(id, url);
@@ -129,7 +132,7 @@ export default function AdminDashboard({ products: initialProducts, posts: initi
         <div>
             {activeTab === 'products' && (
                 <button 
-                    onClick={() => { setEditingProduct(null); setIsProductModalOpen(true); }}
+                    onClick={() => { setEditingProduct(null); setProductImageUrl(''); setIsProductModalOpen(true); }}
                     className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90"
                 >
                     <Plus size={16} /> Add Product
@@ -137,7 +140,7 @@ export default function AdminDashboard({ products: initialProducts, posts: initi
             )}
             {activeTab === 'categories' && (
                 <button 
-                    onClick={() => setIsCategoryModalOpen(true)}
+                    onClick={() => { setEditingCategory(null); setIsCategoryModalOpen(true); }}
                     className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90"
                 >
                     <Plus size={16} /> Add Category
@@ -189,7 +192,7 @@ export default function AdminDashboard({ products: initialProducts, posts: initi
                         </div>
                         <div className="col-span-1 flex gap-2">
                             <button 
-                                onClick={() => { setEditingProduct(product); setIsProductModalOpen(true); }}
+                                onClick={() => { setEditingProduct(product); setProductImageUrl(product.image || ''); setIsProductModalOpen(true); }}
                                 className="p-1 hover:bg-muted rounded text-blue-500"
                                 title="Edit Price & Details"
                             >
@@ -228,7 +231,13 @@ export default function AdminDashboard({ products: initialProducts, posts: initi
                         <div className="col-span-3 font-medium">{category.name}</div>
                         <div className="col-span-3 text-muted-foreground font-mono text-xs">{category.slug}</div>
                         <div className="col-span-4 text-sm text-muted-foreground">{category.description}</div>
-                        <div className="col-span-1">
+                        <div className="col-span-1 flex gap-2">
+                            <button 
+                                onClick={() => { setEditingCategory(category); setIsCategoryModalOpen(true); }}
+                                className="p-1 hover:bg-muted rounded text-blue-500"
+                            >
+                                <Edit2 size={16} />
+                            </button>
                              <form action={async () => {
                                 if(confirm('Are you sure? This might affect linked products.')) {
                                     const result = await deleteCategory(category.id);
@@ -303,7 +312,7 @@ export default function AdminDashboard({ products: initialProducts, posts: initi
             <div className="bg-background rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
-                    <button onClick={() => setIsProductModalOpen(false)}><X size={24} /></button>
+                    <button onClick={() => { setIsProductModalOpen(false); setProductImageUrl(''); }}><X size={24} /></button>
                 </div>
                 <form action={async (formData) => {
                     if (editingProduct) {
@@ -319,6 +328,7 @@ export default function AdminDashboard({ products: initialProducts, posts: initi
                         }
                     }
                     setIsProductModalOpen(false);
+                    setProductImageUrl('');
                 }} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -358,6 +368,18 @@ export default function AdminDashboard({ products: initialProducts, posts: initi
                         <p className="text-xs text-muted-foreground">Format as a JSON array of strings for best results.</p>
                     </div>
 
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Product Image (Optional)</label>
+                        <ImageUploader 
+                            currentImage={editingProduct?.image || productImageUrl || "https://placehold.co/600x400?text=No+Image"}
+                            onUploadComplete={(url) => setProductImageUrl(url)}
+                            folder="products"
+                        />
+                        <p className="text-xs text-muted-foreground">Upload a product image or leave as default placeholder.</p>
+                    </div>
+
+                    <input type="hidden" name="image" value={productImageUrl} />
+
                     <div className="border-t pt-4 mt-4">
                         <h3 className="font-semibold mb-2">SEO Settings</h3>
                         <div className="space-y-4">
@@ -391,23 +413,31 @@ export default function AdminDashboard({ products: initialProducts, posts: initi
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
              <div className="bg-background rounded-lg p-6 w-full max-w-md">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold">Add New Category</h2>
-                    <button onClick={() => setIsCategoryModalOpen(false)}><X size={24} /></button>
+                    <h2 className="text-xl font-bold">{editingCategory ? 'Edit Category' : 'Add New Category'}</h2>
+                    <button onClick={() => { setIsCategoryModalOpen(false); setEditingCategory(null); }}><X size={24} /></button>
                 </div>
                 <form action={async (formData) => {
-                    const result = await createCategory(formData);
-                    if (result.success && result.data) {
-                        setCategories(prev => [...prev, result.data as any]);
+                    if (editingCategory) {
+                        const result = await updateCategory(editingCategory.id, formData);
+                        if (result.success && result.data) {
+                            setCategories(categories.map(c => c.id === editingCategory.id ? result.data as any : c));
+                        }
+                    } else {
+                        const result = await createCategory(formData);
+                        if (result.success && result.data) {
+                            setCategories(prev => [...prev, result.data as any]);
+                        }
                     }
                     setIsCategoryModalOpen(false);
+                    setEditingCategory(null);
                 }} className="space-y-4">
                     <div className="space-y-2">
                         <label className="text-sm font-medium">Name</label>
-                        <input name="name" required className="w-full p-2 border rounded-md bg-background" />
+                        <input name="name" required className="w-full p-2 border rounded-md bg-background" defaultValue={editingCategory?.name || ''} />
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-medium">Description</label>
-                        <textarea name="description" rows={3} className="w-full p-2 border rounded-md bg-background" />
+                        <textarea name="description" rows={3} className="w-full p-2 border rounded-md bg-background" defaultValue={editingCategory?.description || ''} />
                     </div>
 
                     <div className="border-t pt-4 mt-4">

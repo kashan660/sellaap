@@ -1,9 +1,7 @@
 import { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { getDigitalProducts } from "@/lib/products";
-import { Price } from "@/components/Price";
-import { AddToCartButton } from "@/components/AddToCartButton";
+import { ProductCard } from "@/components/ProductCard";
 import { prisma } from "@/lib/prisma";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -58,43 +56,12 @@ export default async function DigitalProductsPage() {
         ) : (
           <div className="mt-12 grid gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
             {products.map((product) => (
-              <div key={product.id} className="group relative bg-card border border-border rounded-lg overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col hover:-translate-y-1">
-                <div className="aspect-video w-full bg-muted relative overflow-hidden">
-                   <Image 
-                      src={product.image || product.fallbackImage} 
-                      alt={product.name}
-                      fill
-                      unoptimized={!!(product.image?.startsWith('http') || product.fallbackImage.startsWith('http'))}
-                      className="object-cover group-hover:scale-110 transition-transform duration-500 ease-in-out"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      priority={product.id <= 3}
-                   />
-                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-                   <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
-                     Instant Delivery
-                   </div>
-                </div>
-                <div className="mt-4 flex justify-between px-4">
-                  <div>
-                    <h3 className="text-lg font-bold text-foreground">
-                      <Link href={`/products/${product.slug}`}>
-                        <span aria-hidden="true" className="absolute inset-0" />
-                        {product.name}
-                      </Link>
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">{product.category?.name || 'Digital Product'}</p>
-                  </div>
-                  <p className="text-lg font-medium text-primary">
-                    <Price amount={product.price} baseCurrency={product.currency} />
-                  </p>
-                </div>
-                <div className="px-4 pb-4 mt-2">
-                   <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
-                </div>
-                <div className="mt-auto p-4 pt-0 relative z-10">
-                    <AddToCartButton product={product} />
-                </div>
-              </div>
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                badgeText="Instant Delivery"
+                imagePriority={product.id <= 3}
+              />
             ))}
           </div>
         )}

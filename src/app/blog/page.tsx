@@ -28,25 +28,43 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function BlogPage() {
-  const blogPosts = await prisma.post.findMany({
-    orderBy: { date: 'desc' }
-  });
-
-  // const blogPosts = [
-  //   {
-  //     id: 1,
-  //     slug: "firestick-guide",
-  //     title: "Ultimate Firestick Guide",
-  //     excerpt: "Everything you need to know about Firestick.",
-  //     content: "Content goes here...",
-  //     date: new Date(),
-  //     category: "Guides",
-  //     keywords: "firestick, guide",
-  //     imageUrl: "https://placehold.co/600x400",
-  //     createdAt: new Date(),
-  //     updatedAt: new Date()
-  //   }
-  // ];
+  let blogPosts = [];
+  
+  try {
+    blogPosts = await prisma.post.findMany({
+      orderBy: { date: 'desc' }
+    });
+  } catch (e) {
+    // Fallback to hardcoded posts if database is not available
+    blogPosts = [
+      {
+        id: 1,
+        slug: "best-cheap-firestick-provider-europe-uk-us",
+        title: "Best Cheap Firestick Provider in Europe, UK & US | Sellaap - Save 70%",
+        excerpt: "Stop overpaying for Firestick setup! Sellaap is the best cheap Firestick provider in Europe, UK & US. Professional setup services at 70% less cost.",
+        content: "",
+        date: new Date("2024-01-18"),
+        category: "Firestick Services",
+        keywords: "cheap firestick provider, best firestick setup europe, affordable firestick services uk",
+        imageUrl: "https://placehold.co/600x400?text=Best+Cheap+Firestick+Provider",
+        createdAt: new Date("2024-01-18"),
+        updatedAt: new Date("2024-01-18")
+      },
+      {
+        id: 2,
+        slug: "affordable-firestick-services-europe-uk-us",
+        title: "Affordable Firestick Services in Europe, UK & US | Save 70%",
+        excerpt: "Discover how to save 70% on Firestick setup services across Europe, UK, and US.",
+        content: "",
+        date: new Date("2024-01-15"),
+        category: "Firestick Services",
+        keywords: "affordable firestick services, firestick setup europe, cheap firestick uk",
+        imageUrl: "https://placehold.co/600x400?text=Affordable+Firestick+Services",
+        createdAt: new Date("2024-01-15"),
+        updatedAt: new Date("2024-01-15")
+      }
+    ];
+  }
 
   return (
     <div className="bg-background py-16 sm:py-24">

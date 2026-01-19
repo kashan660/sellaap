@@ -13,11 +13,13 @@ export default withAuth(
 
         // Admin routes
         if (path.startsWith("/admin")) {
+          console.log('Admin route access attempt - token role:', token?.role, 'path:', path);
           return token?.role === "ADMIN";
         }
 
         // Protected routes
         if (path.startsWith("/profile") || path.startsWith("/checkout")) {
+          console.log('Protected route access attempt - token exists:', !!token, 'path:', path);
           return !!token;
         }
 

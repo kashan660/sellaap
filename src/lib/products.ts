@@ -6,22 +6,31 @@ import { Product, Category } from '@prisma/client';
 export type ProductWithCategory = Product & { category: Category | null };
 
 /**
- * Fetches products from the database including category information.
+ * Fetches products from the database including category information and regional availability.
  * If a product has a specific image set in the DB, it is used.
  * Otherwise, it falls back to the fallbackImage.
  */
-export async function getProducts(): Promise<ProductWithCategory[]> {
+export async function getProducts(region?: string): Promise<ProductWithCategory[]> {
   const products = await prisma.product.findMany({
     include: {
-        category: true
+        category: true,
+        regionalAvailability: true
     },
     orderBy: {
         id: 'asc'
     }
   });
   
+  // Filter products by region if specified
+  let filteredProducts = products;
+  if (region) {
+    filteredProducts = products.filter(product => 
+      product.regionalAvailability.some(ra => ra.region === region && ra.available)
+    );
+  }
+  
   // Map to ensure image property is populated (logic similar to before, but now DB driven)
-  return products.map(product => ({
+  return filteredProducts.map(product => ({
     ...product,
     image: product.image || product.fallbackImage
   }));

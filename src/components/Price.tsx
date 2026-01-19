@@ -2,6 +2,7 @@
 "use client";
 
 import { useCurrency } from "@/context/CurrencyContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { Loader2 } from "lucide-react";
 
 interface PriceProps {
@@ -12,9 +13,10 @@ interface PriceProps {
 
 export function Price({ amount, baseCurrency = "USD", className = "" }: PriceProps) {
   const { currency, rates, isLoading } = useCurrency();
+  const { t } = useLanguage();
 
   if (isLoading) {
-    return <span className={`inline-block animate-pulse bg-muted h-4 w-12 rounded ${className}`} />;
+    return <span className={`inline-block animate-pulse bg-muted h-4 w-12 rounded ${className}`} title={t('currency.loading')} />;
   }
 
   // Calculate converted amount
