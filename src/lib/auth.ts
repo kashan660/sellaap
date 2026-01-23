@@ -18,37 +18,44 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            return null;
+          }
+
+          const user = await prisma.user.findUnique({
+            where: {
+              email: credentials.email,
+            },
+          });
+
+          if (!user) {
+            console.error("Auth failed: User not found for email:", credentials.email);
+            return null;
+          }
+
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
+
+          if (!isPasswordValid) {
+            console.error("Auth failed: Invalid password for email:", credentials.email);
+            // Log the hash length for debugging (don't log the hash itself)
+            console.error("Stored hash length:", user.password.length);
+            return null;
+          }
+
+          return {
+            id: user.id.toString(),
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error("Auth error:", error);
           return null;
         }
-
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
-        });
-
-        if (!user) {
-          console.log("Auth failed: User not found", credentials.email);
-          return null;
-        }
-
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
-
-        if (!isPasswordValid) {
-          console.log("Auth failed: Invalid password for", credentials.email);
-          return null;
-        }
-
-        return {
-          id: user.id.toString(),
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        };
       },
     }),
   ],

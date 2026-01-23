@@ -30,23 +30,11 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
       let timeoutId: NodeJS.Timeout | null = null;
 
       try {
-        // 1. Get User's Location/Currency with better error handling
-        // using a short timeout to avoid blocking
-        const controller = new AbortController();
-        timeoutId = setTimeout(() => controller.abort(), 5000); // Increased timeout to 5 seconds
-
-        const locationRes = await fetch('https://ipapi.co/json/', { 
-            signal: controller.signal,
-            headers: {
-              'Accept': 'application/json',
-            }
-        });
+        // 1. Get User's Location/Currency
+        // Use our own API route which uses Vercel headers (server-side)
+        // This avoids CORS issues with external APIs like ipapi.co
+        const locationRes = await fetch('/api/geo');
         
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-          timeoutId = null;
-        }
-
         if (locationRes.ok) {
             const locationData = await locationRes.json();
             userCurrency = locationData.currency || 'USD';
