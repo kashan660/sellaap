@@ -10,8 +10,9 @@ const Select = React.forwardRef<
     onValueChange?: (value: string) => void
     open?: boolean
     onOpenChange?: (open: boolean) => void
+    disabled?: boolean
   }
->(({ className, children, value, onValueChange, open, onOpenChange, ...props }, ref) => {
+>(({ className, children, value, onValueChange, open, onOpenChange, disabled, ...props }, ref) => {
   const [isOpen, setIsOpen] = React.useState(open || false)
   const [selectedValue, setSelectedValue] = React.useState(value || "")
 
@@ -31,6 +32,7 @@ const Select = React.forwardRef<
   }
 
   const toggleOpen = () => {
+    if (disabled) return
     const newOpen = !isOpen
     setIsOpen(newOpen)
     onOpenChange?.(newOpen)
@@ -45,6 +47,7 @@ const Select = React.forwardRef<
             onOpenChange: toggleOpen,
             selectedValue,
             onSelect: handleSelect,
+            disabled,
           })
         }
         return child
@@ -60,13 +63,15 @@ const SelectTrigger = React.forwardRef<
     isOpen?: boolean
     onOpenChange?: (open: boolean) => void
     placeholder?: string
+    disabled?: boolean
   }
->(({ className, children, isOpen, onOpenChange, placeholder, ...props }, ref) => {
+>(({ className, children, isOpen, onOpenChange, placeholder, disabled, ...props }, ref) => {
   return (
     <button
       ref={ref}
       type="button"
-      onClick={() => onOpenChange?.(!isOpen)}
+      onClick={() => !disabled && onOpenChange?.(!isOpen)}
+      disabled={disabled}
       className={cn(
         "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
         className

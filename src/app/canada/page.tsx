@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CanadaPage() {
-  const products = await getProducts();
+  const products = await getProducts('canada');
 
   return (
     <div className="bg-background py-16 sm:py-24">

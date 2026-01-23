@@ -55,7 +55,7 @@ export default async function DigitalProductsPage() {
           </div>
         ) : (
           <div className="mt-12 grid gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-            {products.map((product) => (
+            {products.map((product: any) => (
               <ProductCard 
                 key={product.id} 
                 product={product} 

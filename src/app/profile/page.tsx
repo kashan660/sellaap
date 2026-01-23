@@ -56,7 +56,7 @@ export default async function ProfilePage() {
         <p className="text-muted-foreground">No orders yet.</p>
       ) : (
         <div className="space-y-6">
-          {user.orders.map((order) => (
+          {user.orders.map((order: any) => (
             <div key={order.id} className="bg-card border rounded-lg overflow-hidden">
               <div className="bg-muted/30 p-4 flex flex-wrap justify-between items-center gap-4 border-b">
                 <div>
@@ -85,7 +85,7 @@ export default async function ProfilePage() {
               </div>
               <div className="p-4">
                 <ul className="divide-y">
-                  {order.items.map((item) => (
+                  {order.items.map((item: any) => (
                     <li key={item.id} className="py-4 flex items-center justify-between">
                       <div className="flex items-center gap-4">
                          <div>

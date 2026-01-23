@@ -6,9 +6,9 @@ const isAccelerate = process.env.POSTGRES_URL?.includes('prisma-data.net') ||
                      process.env.DATABASE_URL?.includes('prisma-data.net') ||
                      process.env.DATABASE_URL?.includes('db.prisma.io');
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
+const globalForPrisma = global as unknown as { prisma: any };
 
-let prisma: PrismaClient;
+let prisma: any;
 
 if (isAccelerate) {
   // Use Prisma Accelerate for cloud database

@@ -2,8 +2,34 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
 export default withAuth(
-  function proxy(req) {
-    // Custom logic if needed
+  async function middleware(request) {
+    const { pathname } = request.nextUrl;
+
+    if (
+      pathname.startsWith('/_next') ||
+      pathname.startsWith('/api') ||
+      pathname.startsWith('/static') ||
+      pathname.includes('.')
+    ) {
+      return NextResponse.next();
+    }
+
+    try {
+      const response = await fetch(`${request.nextUrl.origin}/api/redirects`, {
+        next: { revalidate: 60 },
+      });
+
+      if (response.ok) {
+        const redirects = await response.json();
+        const match = redirects.find((r: any) => r.source === pathname);
+        if (match) {
+          return NextResponse.redirect(new URL(match.destination, request.url), match.permanent ? 308 : 307);
+        }
+      }
+    } catch (error) {
+      console.error('Middleware redirect check failed:', error);
+    }
+
     return NextResponse.next();
   },
   {
@@ -11,15 +37,11 @@ export default withAuth(
       authorized: ({ token, req }) => {
         const path = req.nextUrl.pathname;
 
-        // Admin routes
         if (path.startsWith("/admin")) {
-          console.log('Admin route access attempt - token role:', token?.role, 'path:', path);
           return token?.role === "ADMIN";
         }
 
-        // Protected routes
         if (path.startsWith("/profile") || path.startsWith("/checkout")) {
-          console.log('Protected route access attempt - token exists:', !!token, 'path:', path);
           return !!token;
         }
 
@@ -30,5 +52,8 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/admin/:path*", "/profile/:path*", "/checkout/:path*"],
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 };
+

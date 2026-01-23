@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { revalidatePath } from "next/cache";
 
 export async function createOrder(items: any[], total: number, paymentMethod: string) {
   const session = await getServerSession(authOptions);
@@ -20,7 +21,7 @@ export async function createOrder(items: any[], total: number, paymentMethod: st
     return { error: "Invalid total amount" };
   }
 
-  const allowedPaymentMethods = ['paypal', 'payoneer', 'direct_vendor'];
+  const allowedPaymentMethods = ['paypal', 'payoneer', 'direct_vendor', 'wise', 'btc', 'binance', 'usdt'];
   if (!allowedPaymentMethods.includes(paymentMethod.toLowerCase())) {
     return { error: "Invalid payment method" };
   }
@@ -98,5 +99,53 @@ export async function createOrder(items: any[], total: number, paymentMethod: st
   } catch (error) {
     console.error('Order creation error:', error);
     return { error: "Failed to create order" };
+  }
+}
+
+export async function getOrders() {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== 'ADMIN') {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const orders = await prisma.order.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: { name: true, email: true }
+        },
+        items: {
+          include: {
+            product: {
+              select: { name: true }
+            }
+          }
+        }
+      }
+    });
+    return { success: true, orders };
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    return { error: "Failed to fetch orders" };
+  }
+}
+
+export async function updateOrderStatus(id: number, status: string) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== 'ADMIN') {
+    return { error: "Unauthorized" };
+  }
+
+  try {
+    const order = await prisma.order.update({
+      where: { id },
+      data: { status }
+    });
+    revalidatePath('/admin/orders');
+    return { success: true, order };
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    return { error: "Failed to update order status" };
   }
 }

@@ -22,8 +22,8 @@ export async function generateStaticParams() {
   });
   
   return [
-    ...products.map((product) => ({ slug: product.slug })),
-    ...categories.map((category) => ({ slug: category.slug }))
+    ...products.map((product: any) => ({ slug: product.slug })),
+    ...categories.map((category: any) => ({ slug: category.slug }))
   ];
 }
 
@@ -146,7 +146,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <div className="mb-6">
                 <h3 className="text-lg font-semibold mb-3">Available In</h3>
                 <div className="flex flex-wrap gap-2">
-                  {regionalAvailability.map((region) => (
+                  {regionalAvailability.map((region: any) => (
                     <span
                       key={region.region}
                       className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -205,7 +205,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         {products.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
+            {products.map((product: any) => (
               <div key={product.id} className="bg-card border rounded-lg p-6 hover:shadow-lg transition-shadow">
                 <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
                 <p className="text-muted-foreground mb-4">{product.description}</p>

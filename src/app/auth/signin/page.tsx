@@ -94,11 +94,13 @@ function SignInForm() {
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-muted/50">
-      <div className="w-full max-w-md bg-card p-8 rounded-lg border shadow-sm">
-        <h1 className="text-2xl font-bold mb-6 text-center">Loading...</h1>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-muted/50">
+        <div className="w-full max-w-md bg-card p-8 rounded-lg border shadow-sm">
+          <h1 className="text-2xl font-bold mb-6 text-center">Loading...</h1>
+        </div>
       </div>
-    </div>}>
+    }>
       <SignInForm />
     </Suspense>
   );

@@ -66,7 +66,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
   
   // Location-specific landing pages
-  const locationPages: MetadataRoute.Sitemap = markets.map(market => ({
+  const locationPages: MetadataRoute.Sitemap = markets.map((market: string) => ({
     url: `${baseUrl}/${market}`,
     lastModified: new Date(),
     changeFrequency: 'weekly',
@@ -74,8 +74,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
   
   // Location-specific products
-  const locationProducts: MetadataRoute.Sitemap = markets.flatMap(market => 
-    products.map(product => ({
+  const locationProducts: MetadataRoute.Sitemap = markets.flatMap((market: string) => 
+    products.map((product: any) => ({
       url: `${baseUrl}/${market}/products/${product.slug}`,
       lastModified: product.updatedAt,
       changeFrequency: 'weekly',
@@ -84,8 +84,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
   
   // Location-specific blog posts
-  const locationPosts: MetadataRoute.Sitemap = markets.flatMap(market => 
-    posts.map(post => ({
+  const locationPosts: MetadataRoute.Sitemap = markets.flatMap((market: string) => 
+    posts.map((post: any) => ({
       url: `${baseUrl}/${market}/blog/${post.slug}`,
       lastModified: post.updatedAt,
       changeFrequency: 'monthly',
@@ -94,8 +94,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
   
   // Location-specific categories
-  const locationCategories: MetadataRoute.Sitemap = markets.flatMap(market => 
-    categories.map(category => ({
+  const locationCategories: MetadataRoute.Sitemap = markets.flatMap((market: string) => 
+    categories.map((category: any) => ({
       url: `${baseUrl}/${market}/categories/${category.slug}`,
       lastModified: category.updatedAt,
       changeFrequency: 'weekly',
@@ -104,8 +104,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
   
   // Location-specific pages
-  const locationPagesSeo: MetadataRoute.Sitemap = markets.flatMap(market => 
-    pageSeo.map(page => ({
+  const locationPagesSeo: MetadataRoute.Sitemap = markets.flatMap((market: string) => 
+    pageSeo.map((page: any) => ({
       url: `${baseUrl}/${market}${page.path}`,
       lastModified: page.updatedAt,
       changeFrequency: 'monthly',
@@ -154,8 +154,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
   
   // International versions of blog taxonomy
-  const internationalBlogTaxonomy: MetadataRoute.Sitemap = markets.flatMap(market => 
-    blogTaxonomy.map(page => ({
+  const internationalBlogTaxonomy: MetadataRoute.Sitemap = markets.flatMap((market: string) => 
+    blogTaxonomy.map((page: any) => ({
       url: page.url.replace(baseUrl, `${baseUrl}/${market}`),
       lastModified: page.lastModified,
       changeFrequency: page.changeFrequency as any,

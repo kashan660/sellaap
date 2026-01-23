@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import path from "path";
 import { writeFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
+import { put } from "@vercel/blob";
+
+export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
   try {
@@ -18,27 +21,28 @@ export async function POST(request: Request) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     
-    // Create unique filename to prevent overwrites
     const filename = `${Date.now()}-${file.name.replaceAll(" ", "_")}`;
     
-    // Ensure upload directory exists
+    if (process.env.VERCEL_BLOB_READ_WRITE_TOKEN) {
+      const { url } = await put(`${folder}/${filename}`, buffer, {
+        access: 'public',
+        contentType: file.type || 'application/octet-stream',
+        token: process.env.VERCEL_BLOB_READ_WRITE_TOKEN,
+      });
+      return NextResponse.json({ success: true, url, filename });
+    }
+
     const uploadDir = path.join(process.cwd(), "public", folder);
     if (!existsSync(uploadDir)) {
       await mkdir(uploadDir, { recursive: true });
     }
 
-    // Write file
     const filePath = path.join(uploadDir, filename);
     await writeFile(filePath, buffer);
 
-    // Return relative URL
     const fileUrl = `/${folder}/${filename}`;
 
-    return NextResponse.json({ 
-      success: true,
-      url: fileUrl,
-      filename: filename
-    });
+    return NextResponse.json({ success: true, url: fileUrl, filename });
 
   } catch (error) {
     console.error("Error uploading file:", error);

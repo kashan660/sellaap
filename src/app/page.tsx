@@ -231,7 +231,7 @@ export default async function Home() {
                   title: "Instant Digital Delivery", 
                   description: "Receive your Firestick setup instructions, digital goods, and premium apps immediately after secure payment via PayPal, Payoneer, or direct vendor transfer."
                 }
-             ].map((feature, index) => (
+             ].map((feature: any, index: number) => (
                 <div key={index} className="bg-card p-4 sm:p-6 lg:p-8 rounded-lg shadow-sm border border-border hover:shadow-md transition-all duration-300 group hover:-translate-y-1">
                    <div className="mb-3 sm:mb-4 lg:mb-6">
                       <CheckCircle className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 text-primary mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300" />
@@ -255,7 +255,7 @@ export default async function Home() {
               <p className="mt-3 sm:mt-4 text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto">Discover our most popular Firestick configuration packages, premium streaming apps, and digital entertainment solutions with instant delivery across UK, USA, Europe, Canada, and Australia.</p>
            </div>
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-              {featuredProducts.map((product) => (
+              {featuredProducts.map((product: any) => (
                  <article key={product.id} className="group relative bg-card rounded-lg border border-border overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col hover:-translate-y-1">
                     <div className="aspect-video bg-gradient-to-br from-purple-100 to-blue-100 relative overflow-hidden">
                        <Image 
@@ -311,7 +311,7 @@ export default async function Home() {
               <p className="mt-3 sm:mt-4 text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto">Expert advice on Firestick optimization, streaming setup, digital entertainment trends, and marketplace insights for UK, USA, European, Canadian, and Australian users.</p>
            </div>
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-              {latestPosts.map((post) => (
+              {latestPosts.map((post: any) => (
                  <article key={post.id} className="bg-card rounded-lg border border-border p-4 sm:p-6 lg:p-8 hover:shadow-lg transition-all duration-300 group">
                     <header className="mb-3 sm:mb-4 lg:mb-6">
                        <time className="text-xs font-medium text-muted-foreground block mb-2 sm:mb-3">

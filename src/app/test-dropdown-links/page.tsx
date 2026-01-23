@@ -1,5 +1,5 @@
 // Test script to verify dropdown links work
-import Link from 'next/link';
+'use client';
 
 export default function TestDropdownLinks() {
   const testCategories = [
@@ -15,13 +15,13 @@ export default function TestDropdownLinks() {
       <div className="space-y-2">
         {testCategories.map((category) => (
           <div key={category.id}>
-            <Link 
+            <a 
               href={`/Products/${category.slug}`}
               className="text-blue-600 hover:text-blue-800 underline"
               onClick={() => console.log('Clicked:', category.name, 'URL:', `/Products/${category.slug}`)}
             >
               {category.name} - /Products/{category.slug}
-            </Link>
+            </a>
           </div>
         ))}
       </div>

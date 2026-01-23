@@ -12,14 +12,15 @@ const validLocations = ['uk', 'us', 'canada', 'europe', 'australia'] as const;
 type Location = typeof validLocations[number];
 
 interface Props {
-  params: {
+  params: Promise<{
     location: string;
-  };
+  }>;
 }
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const location = params.location as Location;
+  const { location: slug } = await params;
+  const location = slug as Location;
   
   if (!validLocations.includes(location)) {
     return {
@@ -52,7 +53,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 // Server component for location-specific pages
 export default async function LocationPage({ params }: Props) {
-  const location = params.location as Location;
+  const { location: slug } = await params;
+  const location = slug as Location;
   
   if (!validLocations.includes(location)) {
     notFound();
@@ -249,7 +251,7 @@ export default async function LocationPage({ params }: Props) {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {products.map((product) => (
+              {products.map((product: any) => (
                 <div key={product.id} className="bg-card rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="h-48 bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
                     <div className="text-4xl">📺</div>
@@ -293,7 +295,7 @@ export default async function LocationPage({ params }: Props) {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {recentPosts.map((post) => (
+              {recentPosts.map((post: any) => (
                 <article key={post.id} className="bg-background rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="h-48 bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
                     <div className="text-4xl">📝</div>
