@@ -29,12 +29,14 @@ export async function uploadFile(formData: FormData) {
   const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
   const filename = `${nameWithoutExt}-${uniqueSuffix}.${extension}`;
   
-  if (process.env.VERCEL_BLOB_READ_WRITE_TOKEN) {
+  const token = process.env.VERCEL_BLOB_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+
+  if (token) {
     try {
       const { url } = await put(`uploads/${filename}`, buffer, {
         access: 'public',
         contentType: file.type || 'application/octet-stream',
-        token: process.env.VERCEL_BLOB_READ_WRITE_TOKEN,
+        token: token,
       });
       return {
         success: true,

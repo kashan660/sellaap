@@ -23,11 +23,13 @@ export async function POST(request: Request) {
     
     const filename = `${Date.now()}-${file.name.replaceAll(" ", "_")}`;
     
-    if (process.env.VERCEL_BLOB_READ_WRITE_TOKEN) {
+    const token = process.env.VERCEL_BLOB_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+
+    if (token) {
       const { url } = await put(`${folder}/${filename}`, buffer, {
         access: 'public',
         contentType: file.type || 'application/octet-stream',
-        token: process.env.VERCEL_BLOB_READ_WRITE_TOKEN,
+        token: token,
       });
       return NextResponse.json({ success: true, url, filename });
     }
