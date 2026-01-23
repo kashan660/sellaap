@@ -51,6 +51,7 @@ export default function AdminProductsPage() {
     image: '',
     fallbackImage: '/placeholder.png',
     features: '[]',
+    isFeatured: false,
     regionalAvailability: REGIONS.map(r => ({
       region: r,
       available: true,
@@ -87,12 +88,13 @@ export default function AdminProductsPage() {
     data.append('description', formData.description);
     data.append('price', formData.price);
     data.append('currency', formData.currency);
-    if (formData.categoryId && formData.categoryId !== '0') {
+    if (formData.categoryId) {
       data.append('categoryId', formData.categoryId);
     }
     if (formData.image) data.append('image', formData.image);
     data.append('fallbackImage', formData.fallbackImage);
     data.append('features', formData.features);
+    data.append('isFeatured', String(formData.isFeatured));
     
     const regionalAvailability = formData.regionalAvailability
       .filter(r => r.available)
@@ -150,6 +152,7 @@ export default function AdminProductsPage() {
       image: product.image || '',
       fallbackImage: product.fallbackImage,
       features: product.features || '[]',
+      isFeatured: product.isFeatured || false,
       regionalAvailability: mergedRegions
     });
     setIsDialogOpen(true);
@@ -179,6 +182,7 @@ export default function AdminProductsPage() {
       image: '',
       fallbackImage: '/placeholder.png',
       features: '[]',
+      isFeatured: false,
       regionalAvailability: REGIONS.map(r => ({
         region: r,
         available: true,
@@ -365,6 +369,19 @@ export default function AdminProductsPage() {
                     )}
                     <ImageUpload onImageUpload={handleImageUpload} />
                   </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="isFeatured"
+                      checked={formData.isFeatured}
+                      onChange={(e) => setFormData(prev => ({ ...prev, isFeatured: e.target.checked }))}
+                      className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <label htmlFor="isFeatured" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      Feature this product (Show on Homepage)
+                    </label>
                 </div>
 
                 {/* Regional Availability Section */}

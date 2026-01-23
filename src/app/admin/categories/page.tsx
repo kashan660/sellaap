@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getCategories, createCategory, updateCategory, deleteCategory } from '@/lib/actions/products';
+import { getMenus } from '@/lib/actions/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -12,10 +13,19 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import ImageUpload from '@/components/ImageUpload';
+import { Switch } from '@/components/ui/switch';
 
 interface Category {
   id: number;
@@ -25,8 +35,21 @@ interface Category {
   image: string | null;
 }
 
+interface MenuItem {
+  id: number;
+  label: string;
+  children?: MenuItem[];
+}
+
+interface Menu {
+  id: number;
+  name: string;
+  items: MenuItem[];
+}
+
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -36,22 +59,39 @@ export default function AdminCategoriesPage() {
     name: '',
     slug: '',
     description: '',
-    image: ''
+    image: '',
+    addToMenu: false,
+    menuPlacement: 'top_level', // 'top_level' | 'submenu'
+    targetMenuId: '',
+    parentMenuItemId: 'root'
   });
 
   useEffect(() => {
-    loadCategories();
+    loadData();
   }, []);
 
-  const loadCategories = async () => {
+  const loadData = async () => {
     try {
-      const data = await getCategories();
-      setCategories(data);
+      const [categoriesData, menusData] = await Promise.all([
+        getCategories(),
+        getMenus()
+      ]);
+      setCategories(categoriesData);
+      setMenus(menusData as any);
     } catch (error) {
-      console.error('Error loading categories:', error);
+      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadCategories = async () => {
+      try {
+        const data = await getCategories();
+        setCategories(data);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,6 +102,15 @@ export default function AdminCategoriesPage() {
     data.append('slug', formData.slug);
     if (formData.description) data.append('description', formData.description);
     if (formData.image) data.append('image', formData.image);
+
+    // Menu data (only for create)
+    if (!editingCategory && formData.addToMenu) {
+      data.append('menuPlacement', formData.menuPlacement);
+      data.append('targetMenuId', formData.targetMenuId);
+      if (formData.menuPlacement === 'submenu' && formData.parentMenuItemId !== 'root') {
+        data.append('parentMenuItemId', formData.parentMenuItemId);
+      }
+    }
 
     try {
       let result;
@@ -99,7 +148,16 @@ export default function AdminCategoriesPage() {
   };
 
   const resetForm = () => {
-    setFormData({ name: '', slug: '', description: '', image: '' });
+    setFormData({ 
+      name: '', 
+      slug: '', 
+      description: '', 
+      image: '',
+      addToMenu: false,
+      menuPlacement: 'top_level',
+      targetMenuId: menus.length > 0 ? menus[0].id.toString() : '',
+      parentMenuItemId: 'root'
+    });
     setEditingCategory(null);
   };
 
@@ -109,7 +167,11 @@ export default function AdminCategoriesPage() {
       name: category.name,
       slug: category.slug,
       description: category.description || '',
-      image: category.image || ''
+      image: category.image || '',
+      addToMenu: false,
+      menuPlacement: 'top_level',
+      targetMenuId: '',
+      parentMenuItemId: 'root'
     });
     setIsDialogOpen(true);
   };
@@ -119,6 +181,13 @@ export default function AdminCategoriesPage() {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '');
+  };
+
+  // Helper to get items for selected menu
+  const getSelectedMenuItems = () => {
+    if (!formData.targetMenuId) return [];
+    const menu = menus.find(m => m.id.toString() === formData.targetMenuId);
+    return menu ? menu.items : [];
   };
 
   const filteredCategories = categories.filter(c => 
@@ -155,6 +224,9 @@ export default function AdminCategoriesPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{editingCategory ? 'Edit Category' : 'Create Category'}</DialogTitle>
+              <DialogDescription>
+                {editingCategory ? 'Edit the category details below.' : 'Add a new category to your store.'}
+              </DialogDescription>
             </DialogHeader>
             
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
@@ -205,6 +277,76 @@ export default function AdminCategoriesPage() {
                       </div>
                   )}
               </div>
+
+              {!editingCategory && (
+                <div className="space-y-4 border-t pt-4 mt-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="addToMenu" 
+                      checked={formData.addToMenu}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, addToMenu: checked }))}
+                    />
+                    <Label htmlFor="addToMenu">Add to Menu</Label>
+                  </div>
+
+                  {formData.addToMenu && (
+                     <div className="space-y-4 pl-6 border-l-2 border-muted ml-2">
+                       <div>
+                          <Label>Select Menu</Label>
+                          <Select 
+                            value={formData.targetMenuId} 
+                            onValueChange={(val) => setFormData(prev => ({ ...prev, targetMenuId: val }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a menu" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {menus.map(menu => (
+                                <SelectItem key={menu.id} value={menu.id.toString()}>{menu.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                       </div>
+
+                       <div>
+                          <Label>Placement</Label>
+                          <Select 
+                            value={formData.menuPlacement} 
+                            onValueChange={(val) => setFormData(prev => ({ ...prev, menuPlacement: val }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="top_level">Top Level Item</SelectItem>
+                              <SelectItem value="submenu">Dropdown Item</SelectItem>
+                            </SelectContent>
+                          </Select>
+                       </div>
+
+                       {formData.menuPlacement === 'submenu' && (
+                         <div>
+                            <Label>Parent Item</Label>
+                            <Select 
+                              value={formData.parentMenuItemId} 
+                              onValueChange={(val) => setFormData(prev => ({ ...prev, parentMenuItemId: val }))}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select parent item" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="root">-- Select Parent --</SelectItem>
+                                {getSelectedMenuItems().map(item => (
+                                  <SelectItem key={item.id} value={item.id.toString()}>{item.label}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                         </div>
+                       )}
+                     </div>
+                  )}
+                </div>
+              )}
 
               <div className="flex justify-end space-x-2 pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>

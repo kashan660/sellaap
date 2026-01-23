@@ -2,11 +2,12 @@ import { Hero } from "@/components/Hero";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, CheckCircle, ShoppingCart } from "lucide-react";
-import { getFeaturedProducts } from "@/lib/products";
+import { getFeaturedProducts } from "@/lib/actions/products";
 import { Price } from "@/components/Price";
 import { AddToCartButton } from "@/components/AddToCartButton";
 import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
+import { FeaturedProducts } from "@/components/FeaturedProducts";
 
 // Structured data for homepage
 function generateHomepageStructuredData() {
@@ -148,7 +149,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  const featuredProducts = await getFeaturedProducts();
   const latestPosts = await prisma.post.findMany({
     take: 3,
     orderBy: { date: 'desc' }
@@ -248,60 +248,7 @@ export default async function Home() {
       </section>
 
       {/* Featured Products Section */}
-      <section id="products" className="py-12 sm:py-16 lg:py-20 scroll-mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-           <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-              <h2 className="text-2xl sm:text-3xl font-bold text-foreground lg:text-5xl">Premium Firestick Setup Services & Digital Products</h2>
-              <p className="mt-3 sm:mt-4 text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto">Discover our most popular Firestick configuration packages, premium streaming apps, and digital entertainment solutions with instant delivery across UK, USA, Europe, Canada, and Australia.</p>
-           </div>
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-              {featuredProducts.map((product: any) => (
-                 <article key={product.id} className="group relative bg-card rounded-lg border border-border overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col hover:-translate-y-1">
-                    <div className="aspect-video bg-gradient-to-br from-purple-100 to-blue-100 relative overflow-hidden">
-                       <Image 
-                          src={product.image || product.fallbackImage} 
-                          alt={`${product.name} - Premium Firestick setup service and digital product`}
-                          fill
-                          unoptimized={!!(product.image?.startsWith('http') || product.fallbackImage.startsWith('http'))}
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          loading="lazy"
-                       />
-                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                       <div className="absolute top-2 right-2 bg-primary/90 text-primary-foreground px-2 py-1 rounded-md text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          Sale
-                       </div>
-                    </div>
-                    <div className="p-4 sm:p-6 lg:p-8 flex flex-col flex-grow">
-                       <header className="mb-3 sm:mb-4">
-                          <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground group-hover:text-primary transition-colors leading-tight">
-                             <Link href={`/products/${product.slug}`} className="hover:underline">
-                                <span aria-hidden="true" className="absolute inset-0" />
-                                {product.name}
-                             </Link>
-                          </h3>
-                       </header>
-                       <p className="text-muted-foreground text-sm lg:text-base mb-4 sm:mb-6 flex-grow leading-relaxed group-hover:text-foreground/90 transition-colors duration-300">{product.description}</p>
-                       <footer className="flex justify-between items-center mt-auto relative z-10 pt-3 sm:pt-4 border-t border-border/50">
-                          <div className="flex flex-col">
-                             <span className="text-xl sm:text-2xl font-bold text-primary">
-                               <Price amount={product.price} baseCurrency={product.currency} />
-                             </span>
-                             <span className="text-xs text-muted-foreground">Instant delivery</span>
-                          </div>
-                          <AddToCartButton product={product} />
-                       </footer>
-                    </div>
-                 </article>
-              ))}
-           </div>
-           <div className="text-center mt-8 sm:mt-12 lg:mt-16">
-              <Link href="/products" className="inline-flex items-center text-primary hover:text-primary/80 font-semibold text-base sm:text-lg lg:text-xl group">
-                 View All Firestick Setup Services <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 group-hover:translate-x-1 transition-transform" />
-              </Link>
-           </div>
-        </div>
-      </section>
+      <FeaturedProducts />
 
       {/* Blog Preview Section */}
       <section id="blog" className="py-12 sm:py-16 lg:py-20 bg-muted/30 scroll-mt-20">

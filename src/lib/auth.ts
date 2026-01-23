@@ -41,10 +41,12 @@ export const authOptions: NextAuthOptions = {
 
           if (!isPasswordValid) {
             console.error("Auth failed: Invalid password for email:", credentials.email);
-            // Log the hash length for debugging (don't log the hash itself)
-            console.error("Stored hash length:", user.password.length);
+            // Log details for debugging (safe to log lengths/types)
+            console.error(`Password debug - Input length: ${credentials.password.length}, Hash length: ${user.password.length}`);
             return null;
           }
+
+          console.log("Auth successful for user:", user.email, "Role:", user.role);
 
           return {
             id: user.id.toString(),

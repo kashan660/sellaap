@@ -6,14 +6,25 @@ import { ShoppingCart, Menu, X, User, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
 import { useSession, signOut } from "next-auth/react";
-import { CurrencySelector } from "./CurrencySelector";
-import { LanguageSelector } from "./LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
+import { BrandLogo } from "./BrandLogo";
+import { LanguageSelector } from "./LanguageSelector";
+import { CurrencySelector } from "./CurrencySelector";
+
+import { getMenus } from "@/lib/actions/navigation";
+
+interface MenuItem {
+  id: number;
+  label: string;
+  url: string;
+  children?: MenuItem[];
+}
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isCategoriesDropdownOpen, setIsCategoriesDropdownOpen] = useState(false);
   const [categories, setCategories] = useState<Array<{id: number, name: string, slug: string}>>([]);
+  const [dynamicMenuItems, setDynamicMenuItems] = useState<MenuItem[]>([]);
   const { setIsCartOpen, cartCount } = useCart();
   const { data: session } = useSession();
   const { t } = useLanguage();
@@ -22,17 +33,16 @@ export function Navbar() {
     // Fetch categories for dropdown
     fetch('/api/categories')
       .then(res => {
-        console.log('API response status:', res.status);
+        // ... existing logic ...
         return res.json();
       })
       .then(data => {
-        console.log('Categories fetched:', data.categories);
+        // ... existing logic ...
         if (data.categories && Array.isArray(data.categories)) {
           setCategories(data.categories);
         } else {
-          console.log('No categories found or invalid format');
-          // Fallback to hardcoded categories if API fails
-          setCategories([
+           // ... fallback ...
+           setCategories([
             { id: 1, name: 'Blender 3D Models', slug: 'blender-3d-models' },
             { id: 2, name: 'Digital Products', slug: 'digital-products' },
             { id: 3, name: 'Software', slug: 'software' },
@@ -41,15 +51,22 @@ export function Navbar() {
         }
       })
       .catch(error => {
-        console.error('Error fetching categories:', error);
-        // Fallback to hardcoded categories if API fails
-        setCategories([
+        // ... fallback ...
+         setCategories([
           { id: 1, name: 'Blender 3D Models', slug: 'blender-3d-models' },
           { id: 2, name: 'Digital Products', slug: 'digital-products' },
           { id: 3, name: 'Software', slug: 'software' },
           { id: 4, name: 'Templates', slug: 'templates' }
         ]);
       });
+
+      // Fetch dynamic menus
+      getMenus().then((menus: any) => {
+        const headerMenu = menus.find((m: any) => m.location === 'header') || menus.find((m: any) => m.name === 'Main Menu');
+        if (headerMenu && headerMenu.items) {
+          setDynamicMenuItems(headerMenu.items);
+        }
+      }).catch(err => console.error('Error fetching menus:', err));
   }, []);
 
   // Close dropdown when clicking outside
@@ -72,15 +89,7 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <Link href="/" className="flex items-center gap-2">
-            <Image 
-              src="/logo.svg" 
-              alt="Sellaap Logo" 
-              width={140} 
-              height={40} 
-              className="h-10 w-auto"
-              priority
-              unoptimized
-            />
+            <BrandLogo className="h-10 w-auto" />
           </Link>
           
           <div className="hidden md:flex space-x-8 items-center">
@@ -129,6 +138,31 @@ export function Navbar() {
                 </div>
               )}
             </div>
+            
+            {dynamicMenuItems.map(item => (
+               <div key={item.id} className="relative group h-full flex items-center">
+                 {item.children && item.children.length > 0 ? (
+                   <>
+                     <button className="flex items-center gap-1 text-foreground/80 hover:text-primary transition-colors focus:outline-none">
+                       {item.label}
+                       <ChevronDown size={16} className="transition-transform group-hover:rotate-180" />
+                     </button>
+                     <div className="absolute top-full left-0 mt-0 w-48 bg-card border rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                       {item.children.map(child => (
+                         <Link key={child.id} href={child.url} className="block px-4 py-2 text-sm hover:bg-muted">
+                           {child.label}
+                         </Link>
+                       ))}
+                     </div>
+                   </>
+                 ) : (
+                   <Link href={item.url} className="text-foreground/80 hover:text-primary transition-colors">
+                     {item.label}
+                   </Link>
+                 )}
+               </div>
+            ))}
+
             <Link href="/blog" className="text-foreground/80 hover:text-primary transition-colors">{t('nav.blog')}</Link>
             <Link href="/contact" className="text-foreground/80 hover:text-primary transition-colors">{t('nav.contact')}</Link>
             
@@ -233,6 +267,37 @@ export function Navbar() {
                   </div>
                 )}
               </div>
+
+              {dynamicMenuItems.map(item => (
+                <div key={item.id} className="space-y-1">
+                  {item.children && item.children.length > 0 ? (
+                    <>
+                      <div className="px-3 py-2 text-foreground/80 font-medium">{item.label}</div>
+                      <div className="pl-4 space-y-1">
+                        {item.children.map(child => (
+                          <Link 
+                            key={child.id} 
+                            href={child.url} 
+                            className="block px-3 py-2 text-sm text-foreground/70 hover:text-primary"
+                            onClick={() => setIsOpen(false)}
+                          >
+                            {child.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <Link 
+                      href={item.url} 
+                      className="block px-3 py-2 text-foreground/80 hover:text-primary"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  )}
+                </div>
+              ))}
+
               <Link href="/blog" className="block px-3 py-2 text-foreground/80 hover:text-primary" onClick={() => setIsOpen(false)}>{t('nav.blog')}</Link>
                {session ? (
                 <>

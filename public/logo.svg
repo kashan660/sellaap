@@ -1,17 +1,36 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" fill="none">
   <defs>
-    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#2563eb" />
-      <stop offset="100%" stop-color="#7c3aed" />
+    <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" /> <!-- Indigo 500 -->
+      <stop offset="50%" stop-color="#8b5cf6" /> <!-- Violet 500 -->
+      <stop offset="100%" stop-color="#d946ef" /> <!-- Fuchsia 500 -->
     </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
   </defs>
-  
-  <!-- Icon Mark: Stylized 'S' / Play Button -->
-  <path d="M15 10 C 5 10, 5 25, 15 25 L 25 25 C 35 25, 35 40, 25 40 L 10 40" stroke="url(#logoGradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="35" cy="15" r="4" fill="#7c3aed" />
-  
-  <!-- Text -->
-  <text x="50" y="35" font-family="Arial, sans-serif" font-weight="bold" font-size="32" fill="currentColor">
-    Sell<tspan fill="url(#logoGradient)">aap</tspan>
+
+  <!-- Logo Mark: Abstract 'S' composed of digital nodes/flow -->
+  <g transform="translate(5, 5)">
+    <!-- Main Shape -->
+    <path d="M10 10 L 25 10 Q 35 10 35 20 Q 35 30 25 30 L 15 30 Q 5 30 5 40 Q 5 50 15 50 L 30 50" 
+          stroke="url(#brandGradient)" 
+          stroke-width="6" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"
+          fill="none" />
+          
+    <!-- Digital accent dots -->
+    <circle cx="35" cy="10" r="3" fill="#d946ef" />
+    <circle cx="5" cy="50" r="3" fill="#6366f1" />
+  </g>
+
+  <!-- Brand Name -->
+  <!-- Using system-ui fonts for clean, modern look. 'Sellaap' with 'aap' highlighted -->
+  <text x="55" y="38" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="32" fill="currentColor" letter-spacing="-1">
+    Sell<tspan fill="url(#brandGradient)">aap</tspan>
   </text>
+  
+  <!-- Subtitle/Tagline (Optional, omitted for clean look) -->
 </svg>

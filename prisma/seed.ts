@@ -9,7 +9,7 @@ async function main() {
   console.log('Start seeding ...')
 
   // Seed Admin User
-  const adminPassword = await bcrypt.hash('admin123', 10);
+  const adminPassword = await bcrypt.hash('Wilson@8088', 10);
   const admin = await prisma.user.upsert({
     where: { email: 'admin@sellaap.com' },
     update: {
@@ -24,7 +24,7 @@ async function main() {
       role: 'ADMIN'
     }
   });
-  console.log(`Created admin user: ${admin.email} (password: admin123)`)
+  console.log(`Created admin user: ${admin.email} (password: Wilson@8088)`)
 
   // Seed Products
   for (const p of rawProducts) {
@@ -91,6 +91,17 @@ async function main() {
     console.log(`Added regional availability for product: ${product.name}`)
   }
 
+  // Seed Menus
+  const mainMenu = await prisma.menu.upsert({
+    where: { name: 'Main Menu' },
+    update: { location: 'header' },
+    create: {
+      name: 'Main Menu',
+      location: 'header'
+    }
+  });
+  console.log(`Created menu: ${mainMenu.name}`);
+
   // Seed Posts
   for (const post of blogPosts) {
     const p = await prisma.post.upsert({
@@ -114,11 +125,10 @@ async function main() {
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect()
-  })
-  .catch(async (e) => {
+  .catch((e) => {
     console.error(e)
-    await prisma.$disconnect()
     process.exit(1)
+  })
+  .finally(async () => {
+    await prisma.$disconnect()
   })

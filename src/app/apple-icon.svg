@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 60" fill="none">
+  <defs>
+    <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" /> <!-- Indigo 500 -->
+      <stop offset="50%" stop-color="#8b5cf6" /> <!-- Violet 500 -->
+      <stop offset="100%" stop-color="#d946ef" /> <!-- Fuchsia 500 -->
+    </linearGradient>
+  </defs>
+
+  <rect width="50" height="60" fill="white" rx="10" />
+  
+  <g transform="translate(5, 5)">
+    <path d="M10 10 L 25 10 Q 35 10 35 20 Q 35 30 25 30 L 15 30 Q 5 30 5 40 Q 5 50 15 50 L 30 50" 
+          stroke="url(#brandGradient)" 
+          stroke-width="6" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"
+          fill="none" />
+          
+    <circle cx="35" cy="10" r="3" fill="#d946ef" />
+    <circle cx="5" cy="50" r="3" fill="#6366f1" />
+  </g>
+</svg>

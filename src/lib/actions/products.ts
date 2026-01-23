@@ -17,6 +17,7 @@ const ProductSchema = z.object({
   image: z.string().optional(),
   fallbackImage: z.string().default("/placeholder.png"),
   features: z.string().optional(), // JSON string
+  isFeatured: z.coerce.boolean().optional(),
 });
 
 export async function createProduct(formData: FormData) {
@@ -25,16 +26,29 @@ export async function createProduct(formData: FormData) {
     return { error: "Unauthorized" };
   }
 
+  const categoryIdRaw = formData.get('categoryId');
+  // Handle "0" as null (explicit removal/no category), null as undefined (missing field)
+  let categoryId: number | null | undefined;
+  
+  if (categoryIdRaw === "0") {
+    categoryId = null;
+  } else if (categoryIdRaw) {
+    categoryId = parseInt(categoryIdRaw as string);
+  } else {
+    categoryId = undefined;
+  }
+
   const rawData = {
     name: formData.get('name'),
     slug: formData.get('slug'),
     description: formData.get('description'),
     price: formData.get('price'),
     currency: formData.get('currency'),
-    categoryId: formData.get('categoryId'),
+    categoryId: categoryId,
     image: formData.get('image'),
     fallbackImage: formData.get('fallbackImage') || '/placeholder.png',
     features: formData.get('features'),
+    isFeatured: formData.get('isFeatured') === 'true',
   };
 
   const regionalAvailability = formData.get('regionalAvailability') 
@@ -55,6 +69,7 @@ export async function createProduct(formData: FormData) {
         image: data.image,
         fallbackImage: data.fallbackImage,
         features: data.features,
+        isFeatured: data.isFeatured || false,
         regionalAvailability: {
             create: regionalAvailability.map((r: any) => ({
                 region: r.region,
@@ -82,13 +97,24 @@ export async function updateProduct(id: number, formData: FormData) {
     return { error: "Unauthorized" };
   }
 
+  const categoryIdRaw = formData.get('categoryId');
+  let categoryId: number | null | undefined;
+  
+  if (categoryIdRaw === "0") {
+    categoryId = null;
+  } else if (categoryIdRaw) {
+    categoryId = parseInt(categoryIdRaw as string);
+  } else {
+    categoryId = undefined;
+  }
+
   const rawData = {
     name: formData.get('name'),
     slug: formData.get('slug'),
     description: formData.get('description'),
     price: formData.get('price'),
     currency: formData.get('currency'),
-    categoryId: formData.get('categoryId'),
+    categoryId: categoryId,
     image: formData.get('image'),
     fallbackImage: formData.get('fallbackImage'),
     features: formData.get('features'),
@@ -190,6 +216,8 @@ const CategorySchema = z.object({
   image: z.string().optional(),
 });
 
+import { createMenuItem } from './navigation';
+
 export async function createCategory(formData: FormData) {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== 'ADMIN') {
@@ -203,6 +231,10 @@ export async function createCategory(formData: FormData) {
     image: formData.get('image'),
   };
 
+  const menuPlacement = formData.get('menuPlacement');
+  const targetMenuId = formData.get('targetMenuId');
+  const parentMenuItemId = formData.get('parentMenuItemId');
+
   try {
     const data = CategorySchema.parse(rawData);
     const category = await prisma.category.create({
@@ -213,6 +245,30 @@ export async function createCategory(formData: FormData) {
         image: data.image,
       }
     });
+
+    // Handle Menu Item Creation
+    if (menuPlacement && menuPlacement !== 'none' && targetMenuId) {
+      const menuId = parseInt(targetMenuId as string);
+      let parentId: number | undefined = undefined;
+
+      if (parentMenuItemId && parentMenuItemId !== 'root') {
+        const parsed = parseInt(parentMenuItemId as string);
+        if (!isNaN(parsed)) {
+          parentId = parsed;
+        }
+      }
+      
+      if (!isNaN(menuId)) {
+        await createMenuItem({
+          menuId,
+          label: data.name,
+          url: `/products/${data.slug}`,
+          parentId: menuPlacement === 'submenu' ? parentId : undefined,
+          target: '_self'
+        });
+      }
+    }
+
     revalidatePath('/admin/categories');
     CACHE_CONFIG.categories.tags.forEach(tag => revalidateTag(tag, 'max'));
     return { success: true, category };

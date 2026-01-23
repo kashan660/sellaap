@@ -29,6 +29,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -224,6 +225,7 @@ export default function AdminMenusPage() {
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Create Menu</DialogTitle>
+                    <DialogDescription>Add a new menu to your site navigation.</DialogDescription>
                   </DialogHeader>
                   <form onSubmit={handleCreateMenu} className="space-y-4 mt-4">
                     <div>
@@ -304,6 +306,7 @@ export default function AdminMenusPage() {
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>{editingItem ? 'Edit Item' : 'Add Item'}</DialogTitle>
+                      <DialogDescription>{editingItem ? 'Edit the menu item details.' : 'Add a new item to the menu.'}</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSaveItem} className="space-y-4 mt-4">
                       <div>

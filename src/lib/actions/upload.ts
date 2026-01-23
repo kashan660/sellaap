@@ -54,7 +54,9 @@ export async function uploadFile(formData: FormData) {
   const uploadDir = join(process.cwd(), 'public', 'uploads');
   try {
     await mkdir(uploadDir, { recursive: true });
-  } catch {}
+  } catch (err) {
+    console.error('Error creating upload directory:', err);
+  }
 
   const path = join(uploadDir, filename);
   try {
@@ -68,6 +70,7 @@ export async function uploadFile(formData: FormData) {
       size: file.size,
     };
   } catch (error) {
+    console.error('Error saving file to disk:', error, 'Path:', path);
     return { error: "Failed to save file" };
   }
 }
