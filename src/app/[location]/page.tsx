@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { ArrowRight, Globe, Shield, Clock, Star, CheckCircle } from 'lucide-react';
 import { AddToCartButton } from '@/components/AddToCartButton';
 
+export const dynamic = 'force-dynamic';
+
 // Valid locations for SEO
 const validLocations = ['uk', 'us', 'canada', 'europe', 'australia'] as const;
 type Location = typeof validLocations[number];

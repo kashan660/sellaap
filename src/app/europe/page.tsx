@@ -6,6 +6,8 @@ import Image from "next/image";
 import { Price } from "@/components/Price";
 import { AddToCartButton } from "@/components/AddToCartButton";
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Sellaap Europe - Premium Firestick Setup Services",
