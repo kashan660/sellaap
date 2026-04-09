@@ -123,14 +123,19 @@ export default async function DatabasePage({ params }: PageProps) {
 
 // Generate static params for all published pages
 export async function generateStaticParams() {
-  const pages = await prisma.page.findMany({
-    where: { status: 'PUBLISHED' },
-    select: { slug: true }
-  });
-  
-  return pages.map((page: any) => ({
-    slug: page.slug
-  }));
+  try {
+    const pages = await prisma.page.findMany({
+      where: { status: 'PUBLISHED' },
+      select: { slug: true }
+    });
+    
+    return pages.map((page: any) => ({
+      slug: page.slug
+    }));
+  } catch (error) {
+    console.error('Failed to generate static page slugs:', error);
+    return [];
+  }
 }
 
 // SEO Metadata
@@ -154,8 +159,8 @@ export async function generateMetadata({ params }: PageProps) {
       description: page.metaDescription || page.excerpt || page.content.substring(0, 160),
       images: page.featuredImage ? [page.featuredImage.url] : [],
       type: 'article',
-      publishedTime: page.publishedAt?.toISOString(),
-      modifiedTime: page.updatedAt.toISOString(),
+      publishedTime: page.publishedAt ? new Date(page.publishedAt).toISOString() : undefined,
+      modifiedTime: new Date(page.updatedAt).toISOString(),
       authors: page.author ? [page.author.name || page.author.email] : []
     },
     twitter: {

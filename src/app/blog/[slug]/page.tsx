@@ -10,10 +10,15 @@ type Props = {
 };
 
 export async function generateStaticParams() {
-  const posts = await getPosts('PUBLISHED');
-  return posts.map((post: any) => ({
-    slug: post.slug,
-  }));
+  try {
+    const posts = await getPosts('PUBLISHED');
+    return posts.map((post: any) => ({
+      slug: post.slug,
+    }));
+  } catch (error) {
+    console.error('Failed to generate static blog slugs:', error);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

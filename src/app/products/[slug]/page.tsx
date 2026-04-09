@@ -13,18 +13,23 @@ interface ProductPageProps {
 }
 
 export async function generateStaticParams() {
-  const products = await prisma.product.findMany({
-    select: { slug: true },
-  });
-  
-  const categories = await prisma.category.findMany({
-    select: { slug: true },
-  });
-  
-  return [
-    ...products.map((product: any) => ({ slug: product.slug })),
-    ...categories.map((category: any) => ({ slug: category.slug }))
-  ];
+  try {
+    const products = await prisma.product.findMany({
+      select: { slug: true },
+    });
+    
+    const categories = await prisma.category.findMany({
+      select: { slug: true },
+    });
+    
+    return [
+      ...products.map((product: any) => ({ slug: product.slug })),
+      ...categories.map((category: any) => ({ slug: category.slug }))
+    ];
+  } catch (error) {
+    console.error('Failed to generate static product/category slugs:', error);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
