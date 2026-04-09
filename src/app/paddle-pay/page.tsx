@@ -32,32 +32,26 @@ export default async function PaddlePayPage({ searchParams }: PaddlePayPageProps
 
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-4 py-16">
-      {transactionId && paddleClientToken ? (
-        <PaddlePayInitializer token={paddleClientToken} />
-      ) : null}
       <div className="max-w-xl w-full rounded-lg border bg-card p-6">
         <h1 className="text-2xl font-bold mb-3">Secure Payment</h1>
         {transactionId ? (
           <div className="space-y-2 text-sm text-muted-foreground">
             <p>
-              Checkout is opening for transaction <span className="font-mono">{transactionId}</span>.
+              Preparing checkout for <span className="font-mono text-foreground">{transactionId}</span>. The payment
+              window may open on its own; if not, use the button below.
             </p>
-            <p>If it does not open automatically, refresh this page once.</p>
             {!paddleClientToken ? (
               <p className="text-red-600">
                 Missing <span className="font-mono">NEXT_PUBLIC_PADDLE_CLIENT_TOKEN</span> in environment.
               </p>
-            ) : null}
+            ) : (
+              <PaddlePayInitializer token={paddleClientToken} transactionId={transactionId} />
+            )}
             {envMismatch ? (
               <p className="text-amber-700 dark:text-amber-500 text-sm border border-amber-500/30 rounded-md p-3 mt-2">
                 {envMismatch}
               </p>
             ) : null}
-            <p className="text-xs text-muted-foreground mt-3">
-              Use the exact payment URL from your link (including <span className="font-mono">sellaap.com</span>, not{" "}
-              <span className="font-mono">www</span>) unless you added both domains under Paddle &gt; Checkout &gt; Website
-              approval.
-            </p>
           </div>
         ) : (
           <p className="text-sm text-red-600">
