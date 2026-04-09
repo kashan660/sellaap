@@ -184,6 +184,7 @@ export async function createPaddleCheckout(orderId: number) {
       Authorization: `Bearer ${paddleApiKey}`,
     },
     body: JSON.stringify({
+      collection_mode: "automatic",
       items: order.items.map((item) => ({
         price_id: priceMap[item.productId],
         quantity: item.quantity,
@@ -277,6 +278,7 @@ export async function createDirectPaddlePaymentLink(input: {
       Authorization: `Bearer ${paddleApiKey}`,
     },
     body: JSON.stringify({
+      collection_mode: "automatic",
       items: [
         {
           price_id: priceId,
@@ -372,6 +374,7 @@ export async function createCustomGameOrderCheckout(input: {
       Authorization: `Bearer ${paddleApiKey}`,
     },
     body: JSON.stringify({
+      collection_mode: "automatic",
       currency_code: "USD",
       customer: { email },
       items: [

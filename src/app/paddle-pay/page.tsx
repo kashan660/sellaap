@@ -10,7 +10,6 @@ export default async function PaddlePayPage({ searchParams }: PaddlePayPageProps
   const params = await searchParams;
   const transactionId = params?._ptxn;
   const paddleClientToken = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || "";
-  const paddleEnv = (process.env.NEXT_PUBLIC_PADDLE_ENV || process.env.PADDLE_ENV || "sandbox").toLowerCase();
 
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-4 py-16">
@@ -18,10 +17,8 @@ export default async function PaddlePayPage({ searchParams }: PaddlePayPageProps
       {transactionId ? (
         <Script id="paddle-pay-open" strategy="afterInteractive">
           {`
-            (function openPaddleCheckout() {
-              var txn = ${JSON.stringify(transactionId)};
+            (function initPaddleForPaymentLink() {
               var token = ${JSON.stringify(paddleClientToken)};
-              var env = ${JSON.stringify(paddleEnv)};
               var attempts = 0;
 
               function run() {
@@ -32,24 +29,28 @@ export default async function PaddlePayPage({ searchParams }: PaddlePayPageProps
                 }
 
                 try {
-                  if (env === 'sandbox' && window.Paddle.Environment && typeof window.Paddle.Environment.set === 'function') {
-                    window.Paddle.Environment.set('sandbox');
-                  }
-
                   if (!token) {
                     console.error('Missing NEXT_PUBLIC_PADDLE_CLIENT_TOKEN for Paddle.js checkout open.');
                     return;
                   }
 
-                  if (typeof window.Paddle.Initialize === 'function') {
-                    window.Paddle.Initialize({ token: token });
+                  if (typeof window.Paddle.Initialize !== 'function') {
+                    console.error('Paddle.Initialize is not available.');
+                    return;
                   }
 
-                  if (window.Paddle.Checkout && typeof window.Paddle.Checkout.open === 'function') {
-                    window.Paddle.Checkout.open({ transactionId: txn });
-                  }
+                  window.Paddle.Initialize({
+                    token: token,
+                    checkout: {
+                      settings: {
+                        displayMode: 'overlay',
+                        theme: 'light',
+                        locale: 'en'
+                      }
+                    }
+                  });
                 } catch (e) {
-                  console.error('Failed to open Paddle checkout', e);
+                  console.error('Failed to initialize Paddle checkout', e);
                 }
               }
 
