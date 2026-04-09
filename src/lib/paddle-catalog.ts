@@ -46,43 +46,54 @@ async function paddleFetch(path: string, payload: Record<string, unknown>) {
 }
 
 export async function ensurePaddleProductMapTable() {
-  await prisma.$executeRawUnsafe(`
-    CREATE TABLE IF NOT EXISTS "PaddleProductMap" (
-      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-      "productId" INTEGER NOT NULL UNIQUE,
-      "paddleProductId" TEXT NOT NULL,
-      "paddlePriceId" TEXT NOT NULL,
-      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+  try {
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "PaddleProductMap" (
+        "id" SERIAL PRIMARY KEY,
+        "productId" INTEGER NOT NULL UNIQUE,
+        "paddleProductId" TEXT NOT NULL,
+        "paddlePriceId" TEXT NOT NULL,
+        "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "updatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+  } catch {
+    // SQLite fallback for local environments
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "PaddleProductMap" (
+        "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+        "productId" INTEGER NOT NULL UNIQUE,
+        "paddleProductId" TEXT NOT NULL,
+        "paddlePriceId" TEXT NOT NULL,
+        "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+  }
 }
 
 export async function getPaddleMapByProductId(productId: number): Promise<PaddleMapRow | null> {
   await ensurePaddleProductMapTable();
-  const rows = await prisma.$queryRawUnsafe<PaddleMapRow[]>(
-    `SELECT id, productId, paddleProductId, paddlePriceId FROM "PaddleProductMap" WHERE productId = ? LIMIT 1`,
-    productId
-  );
+  const rows = await prisma.$queryRaw<PaddleMapRow[]>`
+    SELECT id, "productId", "paddleProductId", "paddlePriceId"
+    FROM "PaddleProductMap"
+    WHERE "productId" = ${productId}
+    LIMIT 1
+  `;
   return rows[0] || null;
 }
 
 async function upsertPaddleMap(productId: number, paddleProductId: string, paddlePriceId: string) {
   await ensurePaddleProductMapTable();
-  await prisma.$executeRawUnsafe(
-    `
-      INSERT INTO "PaddleProductMap" (productId, paddleProductId, paddlePriceId, updatedAt)
-      VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-      ON CONFLICT(productId)
-      DO UPDATE SET
-        paddleProductId = excluded.paddleProductId,
-        paddlePriceId = excluded.paddlePriceId,
-        updatedAt = CURRENT_TIMESTAMP
-    `,
-    productId,
-    paddleProductId,
-    paddlePriceId
-  );
+  await prisma.$executeRaw`
+    INSERT INTO "PaddleProductMap" ("productId", "paddleProductId", "paddlePriceId", "updatedAt")
+    VALUES (${productId}, ${paddleProductId}, ${paddlePriceId}, CURRENT_TIMESTAMP)
+    ON CONFLICT("productId")
+    DO UPDATE SET
+      "paddleProductId" = EXCLUDED."paddleProductId",
+      "paddlePriceId" = EXCLUDED."paddlePriceId",
+      "updatedAt" = CURRENT_TIMESTAMP
+  `;
 }
 
 async function createPaddlePrice(paddleProductId: string, product: ProductForSync) {
