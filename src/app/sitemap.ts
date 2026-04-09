@@ -3,30 +3,38 @@ import { prisma } from '@/lib/prisma';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://sellaap.vercel.app';
-  
-  // Get all products
-  const products = await prisma.product.findMany({
-    select: { slug: true, updatedAt: true },
-    orderBy: { updatedAt: 'desc' }
-  });
-  
-  // Get all posts
-  const posts = await prisma.post.findMany({
-    select: { slug: true, updatedAt: true },
-    orderBy: { updatedAt: 'desc' }
-  });
-  
-  // Get all categories
-  const categories = await prisma.category.findMany({
-    select: { slug: true, updatedAt: true },
-    orderBy: { updatedAt: 'desc' }
-  });
-  
-  // Get all page SEO entries
-  const pageSeo = await prisma.pageSeo.findMany({
-    select: { path: true, updatedAt: true },
-    orderBy: { updatedAt: 'desc' }
-  });
+  let products: Array<{ slug: string; updatedAt: Date | string }> = [];
+  let posts: Array<{ slug: string; updatedAt: Date | string }> = [];
+  let categories: Array<{ slug: string; updatedAt: Date | string }> = [];
+  let pageSeo: Array<{ path: string; updatedAt: Date | string }> = [];
+
+  try {
+    const [dbProducts, dbPosts, dbCategories, dbPageSeo] = await Promise.all([
+      prisma.product.findMany({
+        select: { slug: true, updatedAt: true },
+        orderBy: { updatedAt: 'desc' }
+      }),
+      prisma.post.findMany({
+        select: { slug: true, updatedAt: true },
+        orderBy: { updatedAt: 'desc' }
+      }),
+      prisma.category.findMany({
+        select: { slug: true, updatedAt: true },
+        orderBy: { updatedAt: 'desc' }
+      }),
+      (prisma as any).pageSeo?.findMany?.({
+        select: { path: true, updatedAt: true },
+        orderBy: { updatedAt: 'desc' }
+      }) ?? Promise.resolve([])
+    ]);
+
+    products = dbProducts;
+    posts = dbPosts;
+    categories = dbCategories;
+    pageSeo = dbPageSeo;
+  } catch (error) {
+    console.error('Sitemap fallback: failed to read DB content', error);
+  }
   
   // Define markets for international SEO
   const markets = ['uk', 'us', 'canada', 'europe', 'australia'];
