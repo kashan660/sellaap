@@ -13,6 +13,20 @@ function getPaddleApiBaseUrl() {
     : "https://sandbox-api.paddle.com";
 }
 
+function getPaddleHostedCheckoutUrl(transactionId: string) {
+  return `https://checkout.paddle.com/transaction/${transactionId}`;
+}
+
+function normalizeCheckoutUrl(rawUrl: string | null | undefined, transactionId: string | null | undefined) {
+  if (rawUrl && !rawUrl.includes("_ptxn=")) {
+    return rawUrl;
+  }
+  if (transactionId) {
+    return getPaddleHostedCheckoutUrl(transactionId);
+  }
+  return rawUrl || "";
+}
+
 export async function createOrder(items: any[], total: number, paymentMethod: string) {
   const session = await getServerSession(authOptions);
 
@@ -190,7 +204,8 @@ export async function createPaddleCheckout(orderId: number) {
     return { error: detail };
   }
 
-  const checkoutUrl = payload?.data?.checkout?.url;
+  const transactionId = payload?.data?.id as string | undefined;
+  const checkoutUrl = normalizeCheckoutUrl(payload?.data?.checkout?.url, transactionId);
   if (!checkoutUrl) {
     return { error: "Paddle transaction created but no checkout URL returned." };
   }
@@ -198,7 +213,7 @@ export async function createPaddleCheckout(orderId: number) {
   return {
     success: true,
     checkoutUrl,
-    transactionId: payload?.data?.id || null,
+    transactionId: transactionId || null,
   };
 }
 
@@ -286,7 +301,8 @@ export async function createDirectPaddlePaymentLink(input: {
     return { error: detail };
   }
 
-  const checkoutUrl = payload?.data?.checkout?.url;
+  const transactionId = payload?.data?.id as string | undefined;
+  const checkoutUrl = normalizeCheckoutUrl(payload?.data?.checkout?.url, transactionId);
   if (!checkoutUrl) {
     return { error: "Paddle transaction created but no checkout URL returned." };
   }
@@ -294,7 +310,7 @@ export async function createDirectPaddlePaymentLink(input: {
   return {
     success: true,
     checkoutUrl,
-    transactionId: payload?.data?.id || null,
+    transactionId: transactionId || null,
     productName: product.name,
   };
 }
@@ -398,7 +414,8 @@ export async function createCustomGameOrderCheckout(input: {
     return { error: detail };
   }
 
-  const checkoutUrl = payload?.data?.checkout?.url;
+  const transactionId = payload?.data?.id as string | undefined;
+  const checkoutUrl = normalizeCheckoutUrl(payload?.data?.checkout?.url, transactionId);
   if (!checkoutUrl) {
     await prisma.order.update({
       where: { id: order.id },
