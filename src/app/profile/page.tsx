@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Price } from "@/components/Price";
+import { PendingOrderPayButton } from "@/components/PendingOrderPayButton";
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
@@ -81,6 +82,13 @@ export default async function ProfilePage() {
                   }`}>
                     {order.status}
                   </span>
+                  <div className="mt-2">
+                    <PendingOrderPayButton
+                      orderId={order.id}
+                      paymentMethod={order.paymentMethod}
+                      status={order.status}
+                    />
+                  </div>
                 </div>
               </div>
               <div className="p-4">

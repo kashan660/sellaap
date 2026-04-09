@@ -3,6 +3,37 @@ import { ChevronDown } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+type SelectInjectedProps = {
+  isOpen?: boolean
+  onOpenChange?: (open: boolean) => void
+  selectedValue?: string
+  onSelect?: (value: string) => void
+  disabled?: boolean
+}
+
+function injectSelectProps(children: React.ReactNode, injectedProps: SelectInjectedProps): React.ReactNode {
+  return React.Children.map(children, (child) => {
+    if (!React.isValidElement(child)) return child
+
+    const childElement = child as React.ReactElement
+    const childProps = (childElement.props as { children?: React.ReactNode } | undefined) || {}
+    const nextChildren = childProps.children
+      ? injectSelectProps(childProps.children, injectedProps)
+      : childProps.children
+
+    if (typeof childElement.type === "string") {
+      return React.cloneElement(childElement, {
+        ...(nextChildren !== undefined ? { children: nextChildren } : {}),
+      })
+    }
+
+    return React.cloneElement(childElement, {
+      ...injectedProps,
+      ...(nextChildren !== undefined ? { children: nextChildren } : {}),
+    })
+  })
+}
+
 const Select = React.forwardRef<
   React.ElementRef<"div">,
   React.ComponentPropsWithoutRef<"div"> & {
@@ -40,17 +71,12 @@ const Select = React.forwardRef<
 
   return (
     <div ref={ref} className={cn("relative", className)} {...props}>
-      {React.Children.map(children, (child) => {
-        if (React.isValidElement(child)) {
-          return React.cloneElement(child as React.ReactElement<any>, {
-            isOpen,
-            onOpenChange: toggleOpen,
-            selectedValue,
-            onSelect: handleSelect,
-            disabled,
-          })
-        }
-        return child
+      {injectSelectProps(children, {
+        isOpen,
+        onOpenChange: toggleOpen,
+        selectedValue,
+        onSelect: handleSelect,
+        disabled,
       })}
     </div>
   )
@@ -90,8 +116,12 @@ const SelectValue = React.forwardRef<
   React.ComponentPropsWithoutRef<"span"> & {
     selectedValue?: string
     placeholder?: string
+    isOpen?: boolean
+    onOpenChange?: (open: boolean) => void
+    onSelect?: (value: string) => void
+    disabled?: boolean
   }
->(({ className, children, selectedValue, placeholder, ...props }, ref) => {
+>(({ className, children, selectedValue, placeholder, isOpen, onOpenChange, onSelect, disabled, ...props }, ref) => {
   return (
     <span ref={ref} className={cn("truncate", className)} {...props}>
       {selectedValue || placeholder || children}
@@ -105,8 +135,12 @@ const SelectContent = React.forwardRef<
   React.ComponentPropsWithoutRef<"div"> & {
     isOpen?: boolean
     position?: "popper" | "item-aligned"
+    onOpenChange?: (open: boolean) => void
+    selectedValue?: string
+    onSelect?: (value: string) => void
+    disabled?: boolean
   }
->(({ className, children, isOpen, position = "popper", ...props }, ref) => {
+>(({ className, children, isOpen, position = "popper", onOpenChange, selectedValue, onSelect, disabled, ...props }, ref) => {
   if (!isOpen) return null
 
   return (
@@ -130,8 +164,12 @@ const SelectItem = React.forwardRef<
   React.ComponentPropsWithoutRef<"div"> & {
     value: string
     onSelect?: (value: string) => void
+    isOpen?: boolean
+    onOpenChange?: (open: boolean) => void
+    selectedValue?: string
+    disabled?: boolean
   }
->(({ className, children, value, onSelect, ...props }, ref) => {
+>(({ className, children, value, onSelect, isOpen, onOpenChange, selectedValue, disabled, ...props }, ref) => {
   return (
     <div
       ref={ref}

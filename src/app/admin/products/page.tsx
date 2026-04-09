@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createProduct, updateProduct, deleteProduct, getProductsAction, getCategories } from '@/lib/actions/products';
+import { createProduct, updateProduct, deleteProduct, getProductsAction, getCategories, syncProductToPaddle } from '@/lib/actions/products';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,7 +21,7 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from '@/components/ui/dialog';
-import { Plus, Edit, Trash2, Eye, Save, X, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Save, X, Search, RefreshCw } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
 import Image from 'next/image';
 import { Product, Category, ProductRegion } from '@prisma/client';
@@ -168,6 +168,20 @@ export default function AdminProductsPage() {
       } catch (error) {
         console.error('Error deleting product:', error);
       }
+    }
+  };
+
+  const handleSyncToPaddle = async (id: number) => {
+    try {
+      const result = await syncProductToPaddle(id);
+      if (result.success) {
+        alert('Product synced to Paddle successfully.');
+      } else {
+        alert(result.error || 'Failed to sync product to Paddle.');
+      }
+    } catch (error) {
+      console.error('Error syncing to Paddle:', error);
+      alert('Failed to sync product to Paddle.');
     }
   };
 
@@ -483,6 +497,14 @@ export default function AdminProductsPage() {
                     onClick={() => window.open(`/products/${product.slug}`, '_blank')}
                   >
                     <Eye className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleSyncToPaddle(product.id)}
+                    title="Sync to Paddle"
+                  >
+                    <RefreshCw className="w-4 h-4" />
                   </Button>
                   <Button
                     variant="ghost"

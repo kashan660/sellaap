@@ -76,7 +76,12 @@ export async function generateMetadata(): Promise<Metadata> {
       other: {
         'msvalidate.01': seoSettings?.bingVerification || '',
       }
-    }
+    },
+    icons: {
+      icon: '/favicon.svg?v=3',
+      apple: '/apple-icon.svg?v=3',
+      shortcut: '/favicon.svg?v=3',
+    },
   };
 }
 

@@ -77,7 +77,13 @@ export function ProductCard({
       </div>
       
       {/* Add to Cart Button - Automatically included for all products */}
-      <div className="mt-auto p-4 pt-0 relative z-10">
+      <div className="mt-auto p-4 pt-0 relative z-10 space-y-2">
+        <Link
+          href={`/products/${product.slug}`}
+          className="block w-full rounded-md border border-border py-2 px-3 text-center text-sm font-medium hover:bg-muted transition-colors"
+        >
+          More Details
+        </Link>
         <AddToCartButton product={product} />
       </div>
     </div>

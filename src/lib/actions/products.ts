@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { z } from 'zod';
 import { CACHE_CONFIG } from '@/lib/cache';
+import { syncProductToPaddleCatalog } from '@/lib/paddle-catalog';
 
 const ProductSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -81,8 +82,23 @@ export async function createProduct(formData: FormData) {
       },
     });
 
+    if (process.env.PADDLE_AUTO_SYNC === 'true') {
+      try {
+        await syncProductToPaddleCatalog({
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          currency: product.currency,
+        });
+      } catch (syncError) {
+        console.error('Paddle auto-sync failed after create:', syncError);
+      }
+    }
+
     revalidatePath('/products');
     revalidatePath('/admin/products');
+    revalidatePath('/'); // Revalidate homepage for featured products
     CACHE_CONFIG.products.tags.forEach(tag => revalidateTag(tag, 'max'));
     return { success: true, product };
   } catch (error) {
@@ -153,9 +169,24 @@ export async function updateProduct(id: number, formData: FormData) {
       },
     });
 
+    if (process.env.PADDLE_AUTO_SYNC === 'true') {
+      try {
+        await syncProductToPaddleCatalog({
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          currency: product.currency,
+        });
+      } catch (syncError) {
+        console.error('Paddle auto-sync failed after update:', syncError);
+      }
+    }
+
     revalidatePath('/products');
     revalidatePath('/admin/products');
     revalidatePath(`/products/${product.slug}`);
+    revalidatePath('/'); // Revalidate homepage for featured products
     CACHE_CONFIG.products.tags.forEach(tag => revalidateTag(tag, 'max'));
     CACHE_CONFIG.product.tags.forEach(tag => revalidateTag(tag, 'max'));
     return { success: true, product };
@@ -328,5 +359,52 @@ export async function deleteCategory(id: number) {
       return { error: "Cannot delete category because it has products associated with it." };
     }
     return { error: "Failed to delete category" };
+  }
+}
+
+export async function getFeaturedProducts() {
+  const products = await prisma.product.findMany({
+    where: {
+      isFeatured: true
+    },
+    include: {
+      category: true,
+      regionalAvailability: true,
+    },
+    orderBy: {
+      updatedAt: 'desc',
+    },
+    take: 6
+  });
+  return products;
+}
+
+export async function syncProductToPaddle(productId: number) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== 'ADMIN') {
+    return { error: 'Unauthorized' };
+  }
+
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        currency: true,
+      },
+    });
+
+    if (!product) {
+      return { error: 'Product not found' };
+    }
+
+    const result = await syncProductToPaddleCatalog(product);
+    return { success: true, ...result };
+  } catch (error: any) {
+    console.error('Error syncing product to Paddle:', error);
+    return { error: error?.message || 'Failed to sync product to Paddle' };
   }
 }

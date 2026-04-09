@@ -12,13 +12,15 @@ import {
   Shuffle, 
   Settings, 
   LogOut,
-  ShoppingCart
+  ShoppingCart,
+  Link as LinkIcon
 } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 
 const menuItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
+  { href: '/admin/payment-links', label: 'Payment Links', icon: LinkIcon },
   { href: '/admin/products', label: 'Products', icon: Package },
   { href: '/admin/categories', label: 'Categories', icon: Tags },
   { href: '/admin/pages', label: 'Pages', icon: FileText },

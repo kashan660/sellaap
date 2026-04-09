@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { getPaymentSettings } from "@/lib/admin-actions-payment";
 import { useEffect, useState } from "react";
-import { createOrder } from "@/lib/actions/order";
+import { createOrder, createPaddleCheckout } from "@/lib/actions/order";
 import { CreditCard, Banknote } from "lucide-react";
 
 export default function CheckoutPage() {
@@ -16,8 +16,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [paymentSettings, setPaymentSettings] = useState<any>(null);
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
-
-  const arePaymentsEnabled = paymentSettings && (
+  const manualPaymentsEnabled = !!paymentSettings && (
     paymentSettings.isPaypalEnabled || 
     paymentSettings.isPayoneerEnabled || 
     paymentSettings.isWiseEnabled ||
@@ -25,6 +24,7 @@ export default function CheckoutPage() {
     paymentSettings.isBinanceEnabled ||
     paymentSettings.isUsdtEnabled
   );
+  const arePaymentsEnabled = true;
 
   useEffect(() => {
     getPaymentSettings().then(res => {
@@ -58,10 +58,21 @@ export default function CheckoutPage() {
     try {
       const result = await createOrder(items, cartTotal, selectedMethod);
       if (result.success) {
+        if (selectedMethod === 'PADDLE') {
+          const paddleResult = await createPaddleCheckout(result.orderId);
+          if (!paddleResult.success || !paddleResult.checkoutUrl) {
+            alert(paddleResult.error || "Failed to initialize Paddle checkout");
+            return;
+          }
+          clearCart();
+          router.push(paddleResult.checkoutUrl);
+          return;
+        }
+
         clearCart();
         router.push('/profile'); // Or success page
       } else {
-        alert("Checkout failed");
+        alert(result.error || "Checkout failed");
       }
     } catch (e) {
       console.error(e);
@@ -99,17 +110,28 @@ export default function CheckoutPage() {
         <div>
           <h2 className="text-xl font-semibold mb-4">Payment Details</h2>
           <div className="bg-card border rounded-lg p-6 space-y-6">
-             {paymentSettings && !arePaymentsEnabled && (
+             {paymentSettings && !manualPaymentsEnabled && (
                  <div className="p-4 bg-yellow-50 text-yellow-800 rounded-md">
-                     Payment system is currently disabled by administrator.
+                     Manual payment methods are disabled by administrator. You can still use Paddle.
                  </div>
              )}
 
              {arePaymentsEnabled && (
                  <div className="space-y-4">
                      <p className="text-sm text-muted-foreground mb-2">Select a payment method:</p>
+
+                     <div 
+                         onClick={() => setSelectedMethod('PADDLE')}
+                         className={`border rounded-md p-4 cursor-pointer transition-all ${selectedMethod === 'PADDLE' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:border-primary/50'}`}
+                     >
+                         <div className="flex items-center justify-between mb-2">
+                             <span className="font-semibold flex items-center gap-2"><CreditCard size={18} /> Paddle</span>
+                             <input type="radio" checked={selectedMethod === 'PADDLE'} onChange={() => setSelectedMethod('PADDLE')} className="accent-primary" />
+                         </div>
+                         <p className="text-sm text-muted-foreground">Secure card checkout powered by Paddle.</p>
+                     </div>
                      
-                     {paymentSettings.isPaypalEnabled && paymentSettings.paypalEmail && (
+                     {paymentSettings?.isPaypalEnabled && paymentSettings?.paypalEmail && (
                          <div 
                              onClick={() => setSelectedMethod('PAYPAL')}
                              className={`border rounded-md p-4 cursor-pointer transition-all ${selectedMethod === 'PAYPAL' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:border-primary/50'}`}
@@ -122,7 +144,7 @@ export default function CheckoutPage() {
                          </div>
                      )}
 
-                     {paymentSettings.isPayoneerEnabled && paymentSettings.payoneerDetails && (
+                     {paymentSettings?.isPayoneerEnabled && paymentSettings?.payoneerDetails && (
                          <div 
                              onClick={() => setSelectedMethod('PAYONEER')}
                              className={`border rounded-md p-4 cursor-pointer transition-all ${selectedMethod === 'PAYONEER' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:border-primary/50'}`}
@@ -137,7 +159,7 @@ export default function CheckoutPage() {
                          </div>
                      )}
 
-                     {paymentSettings.isWiseEnabled && paymentSettings.wiseDetails && (
+                     {paymentSettings?.isWiseEnabled && paymentSettings?.wiseDetails && (
                          <div 
                              onClick={() => setSelectedMethod('WISE')}
                              className={`border rounded-md p-4 cursor-pointer transition-all ${selectedMethod === 'WISE' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:border-primary/50'}`}
@@ -152,7 +174,7 @@ export default function CheckoutPage() {
                          </div>
                      )}
 
-                     {paymentSettings.isBtcEnabled && paymentSettings.btcAddress && (
+                     {paymentSettings?.isBtcEnabled && paymentSettings?.btcAddress && (
                          <div 
                              onClick={() => setSelectedMethod('BTC')}
                              className={`border rounded-md p-4 cursor-pointer transition-all ${selectedMethod === 'BTC' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:border-primary/50'}`}
@@ -168,7 +190,7 @@ export default function CheckoutPage() {
                          </div>
                      )}
 
-                     {paymentSettings.isBinanceEnabled && paymentSettings.binancePayId && (
+                     {paymentSettings?.isBinanceEnabled && paymentSettings?.binancePayId && (
                          <div 
                              onClick={() => setSelectedMethod('BINANCE')}
                              className={`border rounded-md p-4 cursor-pointer transition-all ${selectedMethod === 'BINANCE' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:border-primary/50'}`}
@@ -184,7 +206,7 @@ export default function CheckoutPage() {
                          </div>
                      )}
 
-                     {paymentSettings.isUsdtEnabled && paymentSettings.usdtAddress && (
+                     {paymentSettings?.isUsdtEnabled && paymentSettings?.usdtAddress && (
                          <div 
                              onClick={() => setSelectedMethod('USDT')}
                              className={`border rounded-md p-4 cursor-pointer transition-all ${selectedMethod === 'USDT' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'hover:border-primary/50'}`}
