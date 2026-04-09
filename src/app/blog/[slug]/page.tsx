@@ -26,24 +26,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  const featuredImageUrl = post.imageUrl || undefined;
+
   return {
     title: post.metaTitle || `${post.title} - Sellaap Blog`,
     description: post.metaDescription || post.excerpt,
-    keywords: post.metaKeywords,
+    keywords: post.keywords,
     openGraph: {
       title: post.metaTitle || post.title,
       description: post.metaDescription || post.excerpt,
       type: "article",
-      publishedTime: post.publishedAt?.toISOString(),
+      publishedTime: post.date?.toISOString?.() || new Date(post.date).toISOString(),
       modifiedTime: post.updatedAt.toISOString(),
       authors: post.author ? [post.author.name || post.author.email] : [],
-      images: post.featuredImage ? [post.featuredImage.url] : [],
+      images: featuredImageUrl ? [featuredImageUrl] : [],
     },
     twitter: {
       card: 'summary_large_image',
       title: post.metaTitle || post.title,
       description: post.metaDescription || post.excerpt,
-      images: post.featuredImage ? [post.featuredImage.url] : []
+      images: featuredImageUrl ? [featuredImageUrl] : []
     }
   };
 }
@@ -57,18 +59,20 @@ export default async function BlogPost({ params }: Props) {
   }
 
   // Format Date
-  const formattedDate = new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', {
+  const formattedDate = new Date(post.date || post.createdAt).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   });
+
+  const featuredImageUrl = post.imageUrl || undefined;
 
   // JSON-LD Structured Data
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: post.title,
-    datePublished: post.publishedAt?.toISOString(),
+    datePublished: post.date?.toISOString?.() || new Date(post.date).toISOString(),
     dateModified: post.updatedAt.toISOString(),
     author: post.author ? {
       "@type": "Person",
@@ -78,7 +82,7 @@ export default async function BlogPost({ params }: Props) {
       name: "Sellaap"
     },
     description: post.excerpt,
-    image: post.featuredImage?.url,
+    image: featuredImageUrl,
     keywords: post.tags?.map((t: any) => t.tag.name).join(', ')
   };
 
@@ -103,7 +107,7 @@ export default async function BlogPost({ params }: Props) {
              <div className="flex items-center gap-2 mb-4 flex-wrap">
                 {post.category && (
                   <span className="text-sm font-bold text-primary uppercase tracking-wide bg-primary/10 px-3 py-1 rounded-full">
-                    {post.category.name}
+                    {post.category}
                   </span>
                 )}
                 <span className="text-sm text-muted-foreground">{formattedDate}</span>
@@ -123,20 +127,15 @@ export default async function BlogPost({ params }: Props) {
               </p>
             )}
             
-            {post.featuredImage && (
+            {featuredImageUrl && (
               <div className="relative w-full h-[400px] mb-8 rounded-xl overflow-hidden shadow-lg">
                 <Image
-                  src={post.featuredImage.url}
-                  alt={post.featuredImage.alt || post.title}
+                  src={featuredImageUrl}
+                  alt={post.title}
                   fill
                   className="object-cover"
                   priority
                 />
-                {post.featuredImage.caption && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-3">
-                    <p className="text-sm">{post.featuredImage.caption}</p>
-                  </div>
-                )}
               </div>
             )}
 
@@ -203,40 +202,7 @@ export default async function BlogPost({ params }: Props) {
             </div>
           )}
 
-          {/* Navigation */}
-          <div className="mt-12 pt-8 border-t">
-            <div className="flex justify-between items-center">
-              <div>
-                {post.previousPost && (
-                  <Link
-                    href={`/blog/${post.previousPost.slug}`}
-                    className="flex items-center text-primary hover:text-primary/80 transition-colors"
-                  >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    <div>
-                      <p className="text-sm text-gray-500">Previous Post</p>
-                      <p className="font-medium">{post.previousPost.title}</p>
-                    </div>
-                  </Link>
-                )}
-              </div>
-              
-              <div>
-                {post.nextPost && (
-                  <Link
-                    href={`/blog/${post.nextPost.slug}`}
-                    className="flex items-center text-primary hover:text-primary/80 transition-colors text-right"
-                  >
-                    <div>
-                      <p className="text-sm text-gray-500">Next Post</p>
-                      <p className="font-medium">{post.nextPost.title}</p>
-                    </div>
-                    <ArrowLeft className="ml-2 h-4 w-4 rotate-180" />
-                  </Link>
-                )}
-              </div>
-            </div>
-          </div>
+          {/* Navigation intentionally omitted until previous/next fields are added to the query type */}
         </article>
       </div>
     </div>

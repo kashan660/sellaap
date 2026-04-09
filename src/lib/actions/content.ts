@@ -157,9 +157,9 @@ export async function deletePage(id: number) {
   }
 }
 
-export async function getPages(status?: string) {
+export async function getPages(status?: 'DRAFT' | 'PUBLISHED' | 'PRIVATE' | 'ARCHIVED') {
   try {
-    const where = status ? { status } : {};
+    const where = status ? { status } : undefined;
     return await prisma.page.findMany({
       where,
       include: {

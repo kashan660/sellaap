@@ -29,33 +29,33 @@ interface Page {
   title: string;
   slug: string;
   content: string;
-  excerpt?: string;
+  excerpt?: string | null;
   status: 'DRAFT' | 'PUBLISHED' | 'PRIVATE' | 'ARCHIVED';
   template: string;
   author?: {
     id: number;
-    name?: string;
+    name?: string | null;
     email: string;
-  };
+  } | null;
   featuredImage?: {
     id: number;
     url: string;
-    alt?: string;
-  };
+    alt?: string | null;
+  } | null;
   parent?: {
     id: number;
     title: string;
     slug: string;
-  };
+  } | null;
   children?: Page[];
   views: number;
-  createdAt: string;
-  updatedAt: string;
-  publishedAt?: string;
-  metaTitle?: string;
-  metaDescription?: string;
-  metaKeywords?: string;
-  ogImage?: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+  publishedAt?: string | Date | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  metaKeywords?: string | null;
+  ogImage?: string | null;
 }
 
 export default function AdminPagesPage() {

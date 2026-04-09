@@ -139,7 +139,8 @@ export async function getProductsWithAddToCart(): Promise<ProductWithCategory[]>
   try {
     const products = await prisma.product.findMany({
       include: {
-        category: true
+        category: true,
+        regionalAvailability: true
       },
       orderBy: {
         id: 'asc'

@@ -50,15 +50,16 @@ export async function getDigitalProducts(): Promise<ProductWithCategory[]> {
       }
     },
     include: {
-        category: true
+        category: true,
+        regionalAvailability: true
     },
     orderBy: {
         id: 'asc'
     }
   });
   
-  return products.map((product: ProductWithCategory) => ({
+  return products.map((product) => ({
     ...product,
     image: product.image || product.fallbackImage
-  }));
+  })) as ProductWithCategory[];
 }

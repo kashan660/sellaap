@@ -382,7 +382,7 @@ export async function getFeaturedProducts() {
 export async function syncProductToPaddle(productId: number) {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== 'ADMIN') {
-    return { error: 'Unauthorized' };
+    return { success: false, error: 'Unauthorized' };
   }
 
   try {
@@ -398,13 +398,13 @@ export async function syncProductToPaddle(productId: number) {
     });
 
     if (!product) {
-      return { error: 'Product not found' };
+      return { success: false, error: 'Product not found' };
     }
 
     const result = await syncProductToPaddleCatalog(product);
-    return { success: true, ...result };
+    return { success: true, ...result } as const;
   } catch (error: any) {
     console.error('Error syncing product to Paddle:', error);
-    return { error: error?.message || 'Failed to sync product to Paddle' };
+    return { success: false, error: error?.message || 'Failed to sync product to Paddle' };
   }
 }
