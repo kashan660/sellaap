@@ -151,10 +151,29 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  const latestPosts = await prisma.post.findMany({
-    take: 3,
-    orderBy: { date: 'desc' }
-  });
+  let latestPosts: Array<{
+    id: number;
+    slug: string;
+    title: string;
+    excerpt: string | null;
+    date: Date;
+  }> = [];
+
+  try {
+    latestPosts = await prisma.post.findMany({
+      take: 3,
+      orderBy: { date: 'desc' },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        excerpt: true,
+        date: true,
+      },
+    });
+  } catch (error) {
+    console.warn('Failed to fetch latest posts for homepage:', error);
+  }
 
   // Mock data for static test
   // const featuredProducts = [
@@ -259,8 +278,8 @@ export default async function Home() {
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground lg:text-5xl">Firestick Setup Guides & Digital Entertainment Tips</h2>
               <p className="mt-3 sm:mt-4 text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto">Expert advice on Firestick optimization, streaming setup, digital entertainment trends, and marketplace insights for UK, USA, European, Canadian, and Australian users.</p>
            </div>
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-              {latestPosts.map((post: any) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+             {latestPosts.map((post) => (
                  <article key={post.id} className="bg-card rounded-lg border border-border p-4 sm:p-6 lg:p-8 hover:shadow-lg transition-all duration-300 group">
                     <header className="mb-3 sm:mb-4 lg:mb-6">
                        <time className="text-xs font-medium text-muted-foreground block mb-2 sm:mb-3">
@@ -277,7 +296,7 @@ export default async function Home() {
                        </h3>
                     </header>
                     <p className="text-muted-foreground line-clamp-3 lg:line-clamp-4 leading-relaxed text-sm lg:text-base">
-                       {post.excerpt}
+                       {post.excerpt || "Read our latest setup and streaming guides."}
                     </p>
                     <footer className="mt-3 sm:mt-4 lg:mt-6 pt-3 sm:pt-4 border-t border-border/50">
                        <Link href={`/blog/${post.slug}`} className="text-primary hover:text-primary/80 font-medium text-sm lg:text-base group-hover:underline inline-flex items-center">

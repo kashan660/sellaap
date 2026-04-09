@@ -363,20 +363,25 @@ export async function deleteCategory(id: number) {
 }
 
 export async function getFeaturedProducts() {
-  const products = await prisma.product.findMany({
-    where: {
-      isFeatured: true
-    },
-    include: {
-      category: true,
-      regionalAvailability: true,
-    },
-    orderBy: {
-      updatedAt: 'desc',
-    },
-    take: 6
-  });
-  return products;
+  try {
+    const products = await prisma.product.findMany({
+      where: {
+        isFeatured: true
+      },
+      include: {
+        category: true,
+        regionalAvailability: true,
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+      take: 6
+    });
+    return products;
+  } catch (error) {
+    console.error('Error fetching featured products:', error);
+    return [];
+  }
 }
 
 export async function syncProductToPaddle(productId: number) {
