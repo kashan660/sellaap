@@ -4,6 +4,8 @@ import { getDigitalProducts } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   let pageSeo = null;
   try {

@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { ProductCard } from "@/components/ProductCard";
 import { getDefaultRegionalAvailability } from "@/lib/regional-availability";
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   let pageSeo = null;
   try {

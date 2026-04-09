@@ -9,6 +9,8 @@ import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 import { FeaturedProducts } from "@/components/FeaturedProducts";
 
+export const dynamic = 'force-dynamic';
+
 // Structured data for homepage
 function generateHomepageStructuredData() {
   return {
