@@ -82,8 +82,6 @@ export function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isCategoriesDropdownOpen]);
 
-  console.log('Current state - categories:', categories.length, 'dropdown open:', isCategoriesDropdownOpen);
-
   return (
     <nav className="fixed w-full bg-background/80 backdrop-blur-md z-50 border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -99,7 +97,6 @@ export function Navbar() {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  console.log('Desktop Products dropdown clicked, toggling from:', isCategoriesDropdownOpen, 'to:', !isCategoriesDropdownOpen);
                   setIsCategoriesDropdownOpen(!isCategoriesDropdownOpen);
                 }}
                 className="flex items-center gap-1 text-foreground/80 hover:text-primary transition-colors focus:outline-none"
@@ -125,7 +122,6 @@ export function Navbar() {
                          href={`/products/${category.slug}`}
                          className="block px-4 py-2 text-sm hover:bg-muted"
                          onClick={(e) => {
-                           console.log('Desktop category link clicked:', category.name, 'slug:', category.slug, 'URL:', `/products/${category.slug}`);
                            setIsCategoriesDropdownOpen(false);
                          }}
                        >
@@ -229,7 +225,6 @@ export function Navbar() {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('Mobile Products dropdown clicked, toggling from:', isCategoriesDropdownOpen, 'to:', !isCategoriesDropdownOpen);
                     setIsCategoriesDropdownOpen(!isCategoriesDropdownOpen);
                   }}
                   className="flex items-center justify-between w-full px-3 py-2 text-foreground/80 hover:text-primary focus:outline-none"
@@ -253,7 +248,6 @@ export function Navbar() {
                            href={`/products/${category.slug}`}
                            className="block px-3 py-2 text-sm text-foreground/70 hover:text-primary"
                            onClick={(e) => {
-                             console.log('Mobile category link clicked:', category.name, 'slug:', category.slug, 'URL:', `/products/${category.slug}`);
                              setIsCategoriesDropdownOpen(false);
                              setIsOpen(false);
                            }}
