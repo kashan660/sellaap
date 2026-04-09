@@ -1,4 +1,4 @@
-import Script from "next/script";
+import { PaddlePayInitializer } from "./PaddlePayInitializer";
 
 interface PaddlePayPageProps {
   searchParams: Promise<{
@@ -6,58 +6,34 @@ interface PaddlePayPageProps {
   }>;
 }
 
+function paddleEnvTokenMismatchMessage(paddleEnv: string, clientToken: string): string | null {
+  const env = paddleEnv.toLowerCase();
+  const t = clientToken.trim();
+  if (!t) return null;
+  if (env === "sandbox" || env === "development" || !env) {
+    if (!t.startsWith("test_")) {
+      return "Server Paddle environment is sandbox, but the client token does not start with test_. Use a sandbox client-side token from your Paddle sandbox dashboard, or set PADDLE_ENV=live and a live_ token for production.";
+    }
+  }
+  if (env === "live") {
+    if (!t.startsWith("live_")) {
+      return "PADDLE_ENV is live, but NEXT_PUBLIC_PADDLE_CLIENT_TOKEN must be a live_ token from the live Paddle dashboard. Sandbox test_ tokens cannot open checkouts for live transactions.";
+    }
+  }
+  return null;
+}
+
 export default async function PaddlePayPage({ searchParams }: PaddlePayPageProps) {
   const params = await searchParams;
   const transactionId = params?._ptxn;
   const paddleClientToken = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || "";
+  const paddleEnv = (process.env.PADDLE_ENV || "sandbox").toLowerCase();
+  const envMismatch = paddleClientToken ? paddleEnvTokenMismatchMessage(paddleEnv, paddleClientToken) : null;
 
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-4 py-16">
-      <Script src="https://cdn.paddle.com/paddle/v2/paddle.js" strategy="afterInteractive" />
-      {transactionId ? (
-        <Script id="paddle-pay-open" strategy="afterInteractive">
-          {`
-            (function initPaddleForPaymentLink() {
-              var token = ${JSON.stringify(paddleClientToken)};
-              var attempts = 0;
-
-              function run() {
-                attempts += 1;
-                if (!window.Paddle) {
-                  if (attempts < 60) setTimeout(run, 150);
-                  return;
-                }
-
-                try {
-                  if (!token) {
-                    console.error('Missing NEXT_PUBLIC_PADDLE_CLIENT_TOKEN for Paddle.js checkout open.');
-                    return;
-                  }
-
-                  if (typeof window.Paddle.Initialize !== 'function') {
-                    console.error('Paddle.Initialize is not available.');
-                    return;
-                  }
-
-                  window.Paddle.Initialize({
-                    token: token,
-                    checkout: {
-                      settings: {
-                        displayMode: 'overlay',
-                        theme: 'light',
-                        locale: 'en'
-                      }
-                    }
-                  });
-                } catch (e) {
-                  console.error('Failed to initialize Paddle checkout', e);
-                }
-              }
-
-              run();
-            })();
-          `}
-        </Script>
+      {transactionId && paddleClientToken ? (
+        <PaddlePayInitializer token={paddleClientToken} />
       ) : null}
       <div className="max-w-xl w-full rounded-lg border bg-card p-6">
         <h1 className="text-2xl font-bold mb-3">Secure Payment</h1>
@@ -72,6 +48,16 @@ export default async function PaddlePayPage({ searchParams }: PaddlePayPageProps
                 Missing <span className="font-mono">NEXT_PUBLIC_PADDLE_CLIENT_TOKEN</span> in environment.
               </p>
             ) : null}
+            {envMismatch ? (
+              <p className="text-amber-700 dark:text-amber-500 text-sm border border-amber-500/30 rounded-md p-3 mt-2">
+                {envMismatch}
+              </p>
+            ) : null}
+            <p className="text-xs text-muted-foreground mt-3">
+              Use the exact payment URL from your link (including <span className="font-mono">sellaap.com</span>, not{" "}
+              <span className="font-mono">www</span>) unless you added both domains under Paddle &gt; Checkout &gt; Website
+              approval.
+            </p>
           </div>
         ) : (
           <p className="text-sm text-red-600">
