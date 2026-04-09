@@ -1,6 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import { getPaddleApiBaseUrl } from '@/lib/paddle-api';
 
 type ProductForSync = {
   id: number;
@@ -16,11 +17,6 @@ type PaddleMapRow = {
   paddleProductId: string;
   paddlePriceId: string;
 };
-
-function getPaddleApiBaseUrl() {
-  const env = (process.env.PADDLE_ENV || 'sandbox').toLowerCase();
-  return env === 'live' ? 'https://api.paddle.com' : 'https://sandbox-api.paddle.com';
-}
 
 async function paddleFetch(path: string, payload: Record<string, unknown>) {
   const paddleApiKey = process.env.PADDLE_API_KEY;

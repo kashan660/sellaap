@@ -5,13 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { getPaddleMapByProductId, syncProductToPaddleCatalog } from "@/lib/paddle-catalog";
-
-function getPaddleApiBaseUrl() {
-  const env = (process.env.PADDLE_ENV || "sandbox").toLowerCase();
-  return env === "live"
-    ? "https://api.paddle.com"
-    : "https://sandbox-api.paddle.com";
-}
+import { getPaddleApiBaseUrl } from "@/lib/paddle-api";
 
 function normalizeCheckoutUrl(rawUrl: string | null | undefined, transactionId: string | null | undefined) {
   if (rawUrl) {
