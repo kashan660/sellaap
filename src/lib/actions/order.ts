@@ -13,16 +13,13 @@ function getPaddleApiBaseUrl() {
     : "https://sandbox-api.paddle.com";
 }
 
-function getPaddleHostedCheckoutUrl(transactionId: string) {
-  return `https://checkout.paddle.com/transaction/${transactionId}`;
-}
-
 function normalizeCheckoutUrl(rawUrl: string | null | undefined, transactionId: string | null | undefined) {
-  if (rawUrl && !rawUrl.includes("_ptxn=")) {
+  if (rawUrl) {
     return rawUrl;
   }
   if (transactionId) {
-    return getPaddleHostedCheckoutUrl(transactionId);
+    const appUrl = process.env.NEXTAUTH_URL || "https://sellaap.com";
+    return `${appUrl.replace(/\/$/, "")}/paddle-pay?_ptxn=${transactionId}`;
   }
   return rawUrl || "";
 }
