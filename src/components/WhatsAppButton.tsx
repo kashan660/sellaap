@@ -1,9 +1,12 @@
 "use client";
 
+interface WhatsAppButtonProps {
+  phoneNumber?: string | null;
+}
 
+export function WhatsAppButton({ phoneNumber }: WhatsAppButtonProps) {
+  if (!phoneNumber) return null;
 
-export function WhatsAppButton() {
-  const phoneNumber = "447454288184";
   const whatsappUrl = `https://wa.me/${phoneNumber}`;
 
   return (
