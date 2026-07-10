@@ -10,6 +10,8 @@ import { CartDrawer } from "@/components/CartDrawer";
 import { AuthProvider } from "@/components/providers/SessionProvider";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { prisma } from "@/lib/prisma";
+import { getCachedSiteSettings } from "@/lib/cache";
+import { ImpactAffiliateScript } from "@/components/AffiliateScripts";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,6 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: description,
     keywords: keywords,
+    metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://sellaap.com'),
     openGraph: {
       type: 'website',
       locale: 'en_US',
@@ -77,6 +80,9 @@ export async function generateMetadata(): Promise<Metadata> {
         'msvalidate.01': seoSettings?.bingVerification || '',
       }
     },
+    other: {
+      'impact-site-verification': '8efd3686-bcb2-41ad-8cdf-d1fb90b01e5f',
+    },
     icons: {
       icon: '/favicon.svg?v=3',
       apple: '/apple-icon.svg?v=3',
@@ -85,16 +91,24 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let siteSettings = null;
+  try {
+    siteSettings = await getCachedSiteSettings();
+  } catch (error) {
+    console.warn("Failed to fetch site settings (using defaults):", error);
+  }
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
+        <ImpactAffiliateScript />
         <AuthProvider>
           <LanguageProvider>
             <CurrencyProvider>
@@ -104,8 +118,16 @@ export default function RootLayout({
                 <main className="flex-grow pt-16">
                   {children}
                 </main>
-                <WhatsAppButton />
-                <Footer />
+                <WhatsAppButton phoneNumber={siteSettings?.whatsappNumber} />
+                <Footer
+                  whatsappNumber={siteSettings?.whatsappNumber}
+                  twitterHandle={siteSettings?.twitterHandle}
+                  facebookUrl={siteSettings?.facebookUrl}
+                  instagramUrl={siteSettings?.instagramUrl}
+                  youtubeUrl={siteSettings?.youtubeUrl}
+                  tiktokUrl={siteSettings?.tiktokUrl}
+                  telegramUrl={siteSettings?.telegramUrl}
+                />
               </CartProvider>
             </CurrencyProvider>
           </LanguageProvider>
