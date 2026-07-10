@@ -103,7 +103,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta name="impact-site-verification" {...{ value: "8efd3686-bcb2-41ad-8cdf-d1fb90b01e5f" }} />
+        <meta name="impact-site-verification" {...{ value: "380f7184-0687-4d01-82e9-ee4e63a86ec7" }} />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
