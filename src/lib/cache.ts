@@ -204,3 +204,11 @@ export const getCachedPaymentSettings = unstable_cache(
   ['payment-settings'],
   CACHE_CONFIG.settings
 );
+
+export const getCachedSiteSettings = unstable_cache(
+  async () => {
+    return prisma.seoSettings.findFirst();
+  },
+  ['site-settings'],
+  CACHE_CONFIG.settings
+);

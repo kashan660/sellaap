@@ -8,18 +8,32 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  name      String?
-  mobile    String?
-  role      String   @default("USER")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  orders    Order[]
-  posts     Post[]   @relation("PostAuthor")
-  pages     Page[]   @relation("PageAuthor")
-  images    Image[]  @relation("ImageUploader")
+  id                  Int                   @id @default(autoincrement())
+  email               String                @unique
+  password            String
+  name                String?
+  mobile              String?
+  role                String                @default("USER")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  orders              Order[]
+  posts               Post[]                @relation("PostAuthor")
+  pages               Page[]                @relation("PageAuthor")
+  images              Image[]               @relation("ImageUploader")
+  passwordResetTokens PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model Category {
@@ -46,6 +60,10 @@ model Product {
   fallbackImage        String
   image                String?
   isFeatured           Boolean         @default(false)
+  digitalFileUrl       String?
+  digitalFileName      String?
+  digitalFileSize      Int?
+  digitalFileMimeType  String?
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt
   orderItems           OrderItem[]
@@ -76,6 +94,12 @@ model SeoSettings {
   ogImage            String?
   googleVerification String?
   bingVerification   String?
+  whatsappNumber     String?
+  facebookUrl        String?
+  instagramUrl       String?
+  youtubeUrl         String?
+  tiktokUrl          String?
+  telegramUrl        String?
   updatedAt          DateTime @updatedAt
 }
 
@@ -225,6 +249,15 @@ model OrderItem {
   price     Float
   order     Order   @relation(fields: [orderId], references: [id])
   product   Product @relation(fields: [productId], references: [id])
+}
+
+model PaddleProductMap {
+  id              Int      @id @default(autoincrement())
+  productId       Int      @unique
+  paddleProductId String
+  paddlePriceId   String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now())
 }
 
 model PaymentSettings {
