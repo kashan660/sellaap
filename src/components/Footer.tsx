@@ -33,7 +33,7 @@ export function Footer({
               <BrandLogo className="h-8 w-auto" />
             </div>
             <p className="text-muted-foreground">
-              Your one-stop shop for premium digital goods. Specializing in Firesticks setup for UK, USA, and Europe.
+              Your one-stop shop for Pet Supplies, Beauty, Electronics, Home Equipment, and Vehicle Accessories - shipped fast across the USA.
             </p>
           </div>
           <div>
@@ -43,7 +43,6 @@ export function Footer({
               <li><Link href="/blog" className="text-muted-foreground hover:text-primary">Blog</Link></li>
               <li><Link href="/about" className="text-muted-foreground hover:text-primary">About Us</Link></li>
               <li><Link href="/contact" className="text-muted-foreground hover:text-primary">Contact</Link></li>
-              <li><Link href="/affiliate" className="text-muted-foreground hover:text-primary font-medium">Affiliate Program</Link></li>
             </ul>
           </div>
           <div>

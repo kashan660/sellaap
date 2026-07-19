@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getCategories, createCategory, updateCategory, deleteCategory } from '@/lib/actions/products';
 import { getMenus } from '@/lib/actions/navigation';
+import { slugify } from '@/lib/slugify';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -33,6 +34,7 @@ interface Category {
   slug: string;
   description: string | null;
   image: string | null;
+  parentId: number | null;
 }
 
 interface MenuItem {
@@ -60,6 +62,7 @@ export default function AdminCategoriesPage() {
     slug: '',
     description: '',
     image: '',
+    parentId: '0',
     addToMenu: false,
     menuPlacement: 'top_level', // 'top_level' | 'submenu'
     targetMenuId: '',
@@ -102,6 +105,7 @@ export default function AdminCategoriesPage() {
     data.append('slug', formData.slug);
     if (formData.description) data.append('description', formData.description);
     if (formData.image) data.append('image', formData.image);
+    data.append('parentId', formData.parentId);
 
     // Menu data (only for create)
     if (!editingCategory && formData.addToMenu) {
@@ -148,11 +152,12 @@ export default function AdminCategoriesPage() {
   };
 
   const resetForm = () => {
-    setFormData({ 
-      name: '', 
-      slug: '', 
-      description: '', 
+    setFormData({
+      name: '',
+      slug: '',
+      description: '',
       image: '',
+      parentId: '0',
       addToMenu: false,
       menuPlacement: 'top_level',
       targetMenuId: menus.length > 0 ? menus[0].id.toString() : '',
@@ -168,19 +173,13 @@ export default function AdminCategoriesPage() {
       slug: category.slug,
       description: category.description || '',
       image: category.image || '',
+      parentId: category.parentId ? category.parentId.toString() : '0',
       addToMenu: false,
       menuPlacement: 'top_level',
       targetMenuId: '',
       parentMenuItemId: 'root'
     });
     setIsDialogOpen(true);
-  };
-
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '');
   };
 
   // Helper to get items for selected menu
@@ -190,10 +189,26 @@ export default function AdminCategoriesPage() {
     return menu ? menu.items : [];
   };
 
-  const filteredCategories = categories.filter(c => 
-    c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredCategories = categories.filter(c =>
+    c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.slug.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Flat, depth-ordered list of all categories for the parent-category picker.
+  const buildParentOptions = (): Array<{ id: number; name: string; depth: number }> => {
+    const options: Array<{ id: number; name: string; depth: number }> = [];
+    const addChildren = (parentId: number | null, depth: number) => {
+      categories
+        .filter((c) => c.parentId === parentId)
+        .forEach((c) => {
+          options.push({ id: c.id, name: c.name, depth });
+          addChildren(c.id, depth + 1);
+        });
+    };
+    addChildren(null, 0);
+    return options;
+  };
+  const parentCategoryOptions = buildParentOptions();
 
   if (loading) {
     return (
@@ -221,7 +236,7 @@ export default function AdminCategoriesPage() {
               New Category
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingCategory ? 'Edit Category' : 'Create Category'}</DialogTitle>
               <DialogDescription>
@@ -240,7 +255,7 @@ export default function AdminCategoriesPage() {
                     setFormData(prev => ({ 
                       ...prev, 
                       name,
-                      slug: !editingCategory ? generateSlug(name) : prev.slug 
+                      slug: !editingCategory ? slugify(name) : prev.slug
                     }));
                   }}
                   required
@@ -276,6 +291,31 @@ export default function AdminCategoriesPage() {
                           Image selected
                       </div>
                   )}
+              </div>
+
+              <div>
+                <Label>Parent Category</Label>
+                <Select
+                  value={formData.parentId}
+                  onValueChange={(val) => setFormData(prev => ({ ...prev, parentId: val }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="None (top-level category)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0">None (top-level category)</SelectItem>
+                    {parentCategoryOptions
+                      .filter((c) => c.id !== editingCategory?.id)
+                      .map((c) => (
+                        <SelectItem key={c.id} value={c.id.toString()}>
+                          {'— '.repeat(c.depth)}{c.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Leave as &quot;None&quot; for a top-level category, or pick one to make this a subcategory.
+                </p>
               </div>
 
               {!editingCategory && (
@@ -379,6 +419,11 @@ export default function AdminCategoriesPage() {
                  <div>
                     <h3 className="font-semibold text-lg">{category.name}</h3>
                     <p className="text-sm text-muted-foreground mt-1">{category.slug}</p>
+                    {category.parentId && (
+                        <p className="text-xs text-primary mt-1">
+                          Subcategory of {categories.find(c => c.id === category.parentId)?.name || '—'}
+                        </p>
+                    )}
                     {category.description && (
                         <p className="text-sm text-gray-600 mt-2 line-clamp-2">{category.description}</p>
                     )}

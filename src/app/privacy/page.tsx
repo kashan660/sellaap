@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import { generateLocationMeta } from '@/lib/seo-utils';
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Sellaap - Your Data Protection & Privacy Rights",
-  description: "Sellaap.com Privacy Policy - Learn how we protect your personal information, data collection practices, cookie usage, and your privacy rights across UK, US, Canada, Europe & Australia.",
+  title: "Privacy Policy - Your Data Protection & Privacy Rights",
+  description: "Sellaap.com Privacy Policy - Learn how we protect your personal information, data collection practices, cookie usage, and your privacy rights.",
   keywords: [
     "privacy policy",
     "data protection",
@@ -12,12 +12,10 @@ export const metadata: Metadata = {
     "cookie policy",
     "user privacy rights",
     "data collection practices",
-    "online privacy",
-    "firestick privacy",
-    "streaming service privacy"
+    "online privacy"
   ],
   openGraph: {
-    title: "Privacy Policy | Sellaap - Your Data Protection & Privacy Rights",
+    title: "Privacy Policy - Your Data Protection & Privacy Rights",
     description: "Learn how Sellaap protects your personal information and respects your privacy rights across all international markets.",
     type: 'website',
     siteName: 'Sellaap',
@@ -25,7 +23,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Privacy Policy | Sellaap - Your Data Protection & Privacy Rights",
+    title: "Privacy Policy - Your Data Protection & Privacy Rights",
     description: "Learn how Sellaap protects your personal information and respects your privacy rights."
   }
 };
@@ -112,8 +110,8 @@ export default function PrivacyPolicy() {
                 <div className="flex items-start space-x-3">
                   <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
                   <div>
-                    <h3 className="font-semibold text-foreground">Provide Marketplace Services</h3>
-                    <p className="text-sm text-muted-foreground">Process orders, manage accounts, and deliver Firestick setup services across UK, US, Canada, Europe, and Australia.</p>
+                    <h3 className="font-semibold text-foreground">Provide Store Services</h3>
+                    <p className="text-sm text-muted-foreground">Process orders, manage accounts, and arrange shipping and delivery for your purchases across the USA.</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
@@ -157,7 +155,7 @@ export default function PrivacyPolicy() {
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="bg-muted/30 rounded-lg p-4">
                   <h3 className="font-semibold text-foreground mb-2">Contractual Necessity</h3>
-                  <p className="text-sm">Processing required to fulfill our service agreements and deliver Firestick setup services.</p>
+                  <p className="text-sm">Processing required to fulfill your orders, including sharing shipping details with our fulfillment partners.</p>
                 </div>
                 <div className="bg-muted/30 rounded-lg p-4">
                   <h3 className="font-semibold text-foreground mb-2">Legitimate Interests</h3>

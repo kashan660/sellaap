@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createPost, updatePost, deletePost, getPosts } from '@/lib/actions/content';
+import { slugify } from '@/lib/slugify';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -165,13 +166,6 @@ export default function AdminBlogPage() {
     });
   };
 
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -233,7 +227,7 @@ export default function AdminBlogPage() {
                       setFormData(prev => ({
                         ...prev,
                         title,
-                        slug: prev.slug || generateSlug(title)
+                        slug: prev.slug || slugify(title)
                       }));
                     }}
                     required

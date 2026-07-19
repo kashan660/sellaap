@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Price } from "@/components/Price";
 import { PendingOrderPayButton } from "@/components/PendingOrderPayButton";
+import { ChangePasswordForm } from "@/components/ChangePasswordForm";
+import { Download } from "lucide-react";
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
@@ -52,6 +54,10 @@ export default async function ProfilePage() {
         </div>
       </div>
 
+      <div className="mb-8">
+        <ChangePasswordForm />
+      </div>
+
       <h2 className="text-2xl font-bold mb-6">Order History</h2>
       {user.orders.length === 0 ? (
         <p className="text-muted-foreground">No orders yet.</p>
@@ -94,16 +100,27 @@ export default async function ProfilePage() {
               <div className="p-4">
                 <ul className="divide-y">
                   {order.items.map((item: any) => (
-                    <li key={item.id} className="py-4 flex items-center justify-between">
+                    <li key={item.id} className="py-4 flex items-center justify-between gap-4">
                       <div className="flex items-center gap-4">
                          <div>
                             <p className="font-medium">{item.product.name}</p>
                             <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
                          </div>
                       </div>
-                      <p className="font-medium">
-                        <Price amount={item.price * item.quantity} baseCurrency={order.currency} />
-                      </p>
+                      <div className="flex items-center gap-4">
+                        {order.status === "COMPLETED" && item.product.digitalFileUrl && (
+                          <a
+                            href={`/api/downloads/${item.id}`}
+                            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                          >
+                            <Download className="w-4 h-4" />
+                            Download
+                          </a>
+                        )}
+                        <p className="font-medium">
+                          <Price amount={item.price * item.quantity} baseCurrency={order.currency} />
+                        </p>
+                      </div>
                     </li>
                   ))}
                 </ul>

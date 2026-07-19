@@ -39,6 +39,50 @@ export async function getFeaturedProducts(limit = 3): Promise<ProductWithCategor
     return products;
 }
 
+export interface ProductFilters {
+  q?: string;
+  categorySlug?: string;
+  minPrice?: number;
+  maxPrice?: number;
+}
+
+/**
+ * Fetches products matching search/filter criteria directly (not cached, since
+ * filter combinations aren't safe cache keys). Use getProducts() for the
+ * unfiltered, cached listing.
+ */
+export async function getFilteredProducts(filters: ProductFilters): Promise<ProductWithCategory[]> {
+  const { q, categorySlug, minPrice, maxPrice } = filters;
+
+  const products = await prisma.product.findMany({
+    where: {
+      AND: [
+        q
+          ? {
+              OR: [
+                { name: { contains: q } },
+                { description: { contains: q } },
+              ],
+            }
+          : {},
+        categorySlug ? { category: { slug: categorySlug } } : {},
+        minPrice !== undefined ? { price: { gte: minPrice } } : {},
+        maxPrice !== undefined ? { price: { lte: maxPrice } } : {},
+      ],
+    },
+    include: {
+      category: true,
+      regionalAvailability: true,
+    },
+    orderBy: { id: 'asc' },
+  });
+
+  return products.map((product) => ({
+    ...product,
+    image: product.image || product.fallbackImage,
+  })) as ProductWithCategory[];
+}
+
 /**
  * Fetches digital products (products in the 'digital' category)
  */

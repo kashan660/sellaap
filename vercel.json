@@ -5,5 +5,11 @@
       "source": "/(.*)",
       "destination": "/$1"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/cj/sync",
+      "schedule": "0 3 * * *"
+    }
   ]
 }

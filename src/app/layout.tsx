@@ -34,20 +34,17 @@ export async function generateMetadata(): Promise<Metadata> {
     console.warn("Failed to fetch SEO settings (using defaults):", error);
   }
 
-  const title = seoSettings?.siteTitle || "Sellaap - Premium Digital Goods & Firestick Setup";
-  const description = seoSettings?.siteDescription || "Your trusted source for digital goods and Firestick setup in UK, USA, and Europe. Best prices for IPTV packages and Firestick deals.";
+  const title = seoSettings?.siteTitle || "Sellaap - Pet Supplies, Beauty, Electronics, Home & Vehicle Accessories";
+  const description = seoSettings?.siteDescription || "Shop top-quality Pet Supplies, Beauty, Electronics, Home Equipment, and Vehicle Accessories at Sellaap, with fast US shipping and secure checkout.";
   const keywords = seoSettings?.defaultKeywords ? seoSettings.defaultKeywords.split(',') : [
-    "cheap iptv packages", 
-    "firestick cheap price", 
-    "best price firestick", 
-    "Firestick setup", 
-    "digital goods", 
-    "IPTV setup", 
-    "UK Firestick", 
-    "USA Firestick", 
-    "Europe Firestick", 
-    "digital products", 
-    "streaming devices"
+    "pet supplies",
+    "beauty products",
+    "electronics accessories",
+    "home equipment",
+    "vehicle accessories",
+    "online store USA",
+    "fast US shipping",
+    "secure checkout"
   ];
 
   return {

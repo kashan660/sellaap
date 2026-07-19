@@ -1,8 +1,10 @@
 import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import Image from "next/image";
 import { AddToCartButton } from "@/components/AddToCartButton";
-import { generateProductMeta, generateProductStructuredData, generateCategoryMeta, generateCanonicalUrl } from "@/lib/seo-utils";
+import { ProductGallery } from "@/components/ProductGallery";
+import { generateProductMeta, generateProductStructuredData, generateCategoryMeta, generateBreadcrumbStructuredData, getSiteUrl } from "@/lib/seo-utils";
 import Script from "next/script";
 import { getDefaultRegionalAvailability } from "@/lib/regional-availability";
 
@@ -42,28 +44,16 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   });
 
   if (product) {
-    // Generate SEO-optimized metadata for multiple markets
+    // Generate SEO-optimized metadata (UK copy used as default site-wide tone)
     const ukMeta = generateProductMeta(product, 'uk');
-    const usMeta = generateProductMeta(product, 'us');
-    const canadaMeta = generateProductMeta(product, 'canada');
-    const europeMeta = generateProductMeta(product, 'europe');
-    const australiaMeta = generateProductMeta(product, 'australia');
-    
-    // Return enhanced metadata with international support
+
     return {
-      ...ukMeta, // Use UK as primary market
+      ...ukMeta,
       alternates: {
-        canonical: generateCanonicalUrl(`/products/${slug}`, 'uk'),
-        languages: {
-          'en-US': generateCanonicalUrl(`/products/${slug}`, 'us'),
-          'en-CA': generateCanonicalUrl(`/products/${slug}`, 'canada'),
-          'en-EU': generateCanonicalUrl(`/products/${slug}`, 'europe'),
-          'en-AU': generateCanonicalUrl(`/products/${slug}`, 'australia'),
-        }
+        // Self-referencing canonical: this page only exists at /products/{slug},
+        // there are no separate /uk|us|.../products/{slug} routes to alternate to.
+        canonical: `${getSiteUrl()}/products/${slug}`,
       },
-      other: {
-        'og:locale:alternate': ['en_US', 'en_CA', 'en_EU', 'en_AU']
-      }
     };
   }
 
@@ -75,22 +65,12 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   if (category) {
     // Generate SEO-optimized metadata for categories
     const ukCategoryMeta = generateCategoryMeta(category, 'uk');
-    
-    // Return enhanced category metadata with international support
+
     return {
       ...ukCategoryMeta,
       alternates: {
-        canonical: generateCanonicalUrl(`/products/${slug}`, 'uk'),
-        languages: {
-          'en-US': generateCanonicalUrl(`/products/${slug}`, 'us'),
-          'en-CA': generateCanonicalUrl(`/products/${slug}`, 'canada'),
-          'en-EU': generateCanonicalUrl(`/products/${slug}`, 'europe'),
-          'en-AU': generateCanonicalUrl(`/products/${slug}`, 'australia'),
-        }
+        canonical: `${getSiteUrl()}/products/${slug}`,
       },
-      other: {
-        'og:locale:alternate': ['en_US', 'en_CA', 'en_EU', 'en_AU']
-      }
     };
   }
 
@@ -107,20 +87,40 @@ export default async function ProductPage({ params }: ProductPageProps) {
   // First try to find a product
   const product = await prisma.product.findUnique({
     where: { slug },
-    include: { 
-      category: true
+    include: {
+      category: true,
+      images: { orderBy: { order: 'asc' } },
     }
   });
-  
+
   // Get regional availability separately to avoid Prisma include issues
   const regionalAvailability = product ? await prisma.productRegion.findMany({
     where: { productId: product.id }
   }) : [];
 
+  const galleryImages = product
+    ? product.images.length > 0
+      ? product.images.map((img) => img.url)
+      : [product.image || product.fallbackImage]
+    : [];
+
+  const relatedProducts = product?.categoryId
+    ? await prisma.product.findMany({
+        where: { categoryId: product.categoryId, id: { not: product.id } },
+        take: 4,
+        orderBy: { createdAt: 'desc' },
+      })
+    : [];
+
   if (product) {
     // Generate structured data for the product
     const structuredData = generateProductStructuredData(product, 'uk');
-    
+    const breadcrumbData = generateBreadcrumbStructuredData([
+      { name: 'Home', url: getSiteUrl() },
+      { name: 'Products', url: `${getSiteUrl()}/products` },
+      { name: product.name, url: `${getSiteUrl()}/products/${slug}` },
+    ]);
+
     // Render product page
     return (
       <div className="container mx-auto px-4 py-8">
@@ -132,8 +132,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
             __html: JSON.stringify(structuredData)
           }}
         />
-        
+        <Script
+          id="product-breadcrumb-structured-data"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(breadcrumbData)
+          }}
+        />
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div>
+            <ProductGallery images={galleryImages} name={product.name} />
+          </div>
           <div>
             <h1 className="text-4xl font-bold mb-4">{product.name}</h1>
             {product.category && (
@@ -169,13 +179,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
             )}
             
             <AddToCartButton product={product} />
-          </div>
-          <div>
-            <div className="bg-muted rounded-lg p-6">
+
+            <div className="bg-muted rounded-lg p-6 mt-6">
               <h3 className="text-xl font-semibold mb-4">Product Details</h3>
               <div className="space-y-2">
                 <p><strong>Price:</strong> {product.currency} {product.price}</p>
                 <p><strong>Availability:</strong> In Stock</p>
+                {product.sku && (
+                  <p><strong>SKU:</strong> {product.sku}</p>
+                )}
                 {product.category && (
                   <p><strong>Category:</strong> {product.category.name}</p>
                 )}
@@ -183,6 +195,38 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
           </div>
         </div>
+
+        {relatedProducts.length > 0 && (
+          <div className="mt-16">
+            <h2 className="text-2xl font-bold mb-6">Related Products</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relatedProducts.map((related) => (
+                <Link
+                  key={related.id}
+                  href={`/products/${related.slug}`}
+                  className="group block bg-card border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                >
+                  <div className="relative aspect-square w-full overflow-hidden bg-gray-100">
+                    {(related.image || related.fallbackImage) && (
+                      <Image
+                        src={related.image || related.fallbackImage}
+                        alt={related.name}
+                        fill
+                        unoptimized
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      />
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold line-clamp-1">{related.name}</h3>
+                    <p className="text-primary font-bold mt-1">{related.currency} {related.price}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     );
   }

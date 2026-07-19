@@ -116,6 +116,149 @@ export const blogPosts: BlogPost[] = [
         <li><strong>No-Logs Policy:</strong> Guarantees the VPN provider stores no records of your activity.</li>
       </ul>
     `
+  },
+  {
+    id: 5,
+    slug: "pet-supplies-must-haves",
+    title: "5 Must-Have Pet Supplies for a Happy, Healthy Pet",
+    excerpt: "From comfy bedding to interactive toys, here are the pet supplies every dog or cat owner should have on hand.",
+    date: "July 18, 2026",
+    category: "Pet Supplies",
+    keywords: ["pet supplies", "dog essentials", "cat essentials", "pet care tips", "pet accessories"],
+    content: `
+      <h2>Keeping Your Pet Happy and Healthy</h2>
+      <p>Whether you're a first-time pet owner or adding a new furry friend to the family, having the right supplies on hand makes all the difference. Here are five essentials worth prioritizing.</p>
+
+      <h3>1. Comfortable Bedding</h3>
+      <p>A supportive, washable bed gives your pet a dedicated space to rest and can help with joint health as they age.</p>
+
+      <h3>2. Interactive Toys</h3>
+      <p>Mental stimulation matters as much as physical exercise. Puzzle feeders and interactive toys help prevent boredom and destructive behavior.</p>
+
+      <h3>3. Grooming Tools</h3>
+      <p>Regular brushing keeps shedding under control and gives you a chance to check for skin issues early.</p>
+
+      <h3>4. Durable Feeding Bowls</h3>
+      <p>Look for non-slip, easy-to-clean bowls sized appropriately for your pet's breed and age.</p>
+
+      <h3>5. A Sturdy Leash and Harness</h3>
+      <p>For walks and outings, a well-fitted harness is safer and more comfortable than a collar alone for most dogs.</p>
+
+      <h2>Shop Pet Supplies at Sellaap</h2>
+      <p>Browse our Pet Supplies category for quality products shipped fast across the USA.</p>
+    `
+  },
+  {
+    id: 6,
+    slug: "simple-skincare-routine-guide",
+    title: "Building a Simple Skincare Routine: A Beginner's Guide",
+    excerpt: "You don't need a 10-step routine to get healthy skin. Here's how to build a simple, effective skincare routine that actually works.",
+    date: "July 18, 2026",
+    category: "Beauty",
+    keywords: ["skincare routine", "beauty basics", "skincare tips", "beginner skincare"],
+    content: `
+      <h2>Less Is More</h2>
+      <p>A great skincare routine doesn't need to be complicated. Focus on these core steps and build from there as your skin's needs change.</p>
+
+      <h3>1. Cleanse</h3>
+      <p>Start and end your day with a gentle cleanser suited to your skin type - this removes dirt and excess oil without stripping your skin.</p>
+
+      <h3>2. Moisturize</h3>
+      <p>A good moisturizer helps maintain your skin's natural barrier, whether you have dry, oily, or combination skin.</p>
+
+      <h3>3. Protect</h3>
+      <p>Daily sun protection is one of the most important steps for long-term skin health, rain or shine.</p>
+
+      <h3>4. Add Targeted Treatments Gradually</h3>
+      <p>Once the basics are in place, you can introduce serums or treatments for specific concerns like fine lines or dark spots - just one at a time.</p>
+
+      <h2>Shop Beauty Essentials at Sellaap</h2>
+      <p>Explore our Beauty category for skincare and personal care essentials.</p>
+    `
+  },
+  {
+    id: 7,
+    slug: "top-electronics-accessories",
+    title: "Top Electronics Accessories to Upgrade Your Everyday Tech",
+    excerpt: "From fast chargers to wireless earbuds, these electronics accessories make your everyday devices more useful.",
+    date: "July 18, 2026",
+    category: "Electronics",
+    keywords: ["electronics accessories", "tech gadgets", "wireless earbuds", "phone accessories"],
+    content: `
+      <h2>Small Upgrades, Big Difference</h2>
+      <p>You don't need to replace your devices to get more out of them - the right accessories can make a big impact.</p>
+
+      <h3>Wireless Earbuds</h3>
+      <p>A good pair of wireless earbuds is one of the most-used accessories for calls, music, and workouts alike.</p>
+
+      <h3>Fast Chargers and Cables</h3>
+      <p>A reliable fast charger cuts down on downtime and is worth having at your desk, in your bag, and in the car.</p>
+
+      <h3>Protective Cases</h3>
+      <p>A quality case protects your device from everyday drops and scratches without adding much bulk.</p>
+
+      <h3>Smart Home Add-Ons</h3>
+      <p>Small smart plugs and sensors are an easy way to start automating your home without a big investment.</p>
+
+      <h2>Shop Electronics at Sellaap</h2>
+      <p>Check out our Electronics category for accessories and gadgets shipped fast across the USA.</p>
+    `
+  },
+  {
+    id: 8,
+    slug: "home-equipment-essentials",
+    title: "Essential Home Equipment for a Well-Organized House",
+    excerpt: "The right home equipment makes everyday chores easier. Here's what to prioritize for a more organized home.",
+    date: "July 18, 2026",
+    category: "Home Equipment",
+    keywords: ["home equipment", "home organization", "household tools", "home essentials"],
+    content: `
+      <h2>Building a More Efficient Home</h2>
+      <p>A few well-chosen tools can make everyday household tasks noticeably easier. Here's where to start.</p>
+
+      <h3>Storage Solutions</h3>
+      <p>Stackable bins and organizers help keep closets, garages, and pantries functional instead of cluttered.</p>
+
+      <h3>Cleaning Tools</h3>
+      <p>A good handheld vacuum or steam mop can cut regular cleaning time significantly.</p>
+
+      <h3>Multi-Purpose Tools</h3>
+      <p>Compact tool kits are handy for quick fixes around the house without needing a full workshop.</p>
+
+      <h3>Smart Home Basics</h3>
+      <p>Smart plugs, bulbs, and sensors are an easy entry point into home automation.</p>
+
+      <h2>Shop Home Equipment at Sellaap</h2>
+      <p>Browse our Home Equipment category for tools and gear to help around the house.</p>
+    `
+  },
+  {
+    id: 9,
+    slug: "must-have-vehicle-accessories",
+    title: "Must-Have Vehicle Accessories for Every Driver",
+    excerpt: "From phone mounts to organizers, these vehicle accessories make every drive more convenient.",
+    date: "July 18, 2026",
+    category: "Vehicle Accessories",
+    keywords: ["vehicle accessories", "car accessories", "car organization", "driving essentials"],
+    content: `
+      <h2>Make Every Drive More Convenient</h2>
+      <p>Whether you're commuting daily or taking road trips, a few accessories go a long way toward a more comfortable ride.</p>
+
+      <h3>Phone Mounts</h3>
+      <p>A secure, adjustable phone mount keeps navigation and calls within easy reach without a hand off the wheel.</p>
+
+      <h3>Car Organizers</h3>
+      <p>Seat-back and trunk organizers keep everyday items in place instead of sliding around the cabin.</p>
+
+      <h3>Charging Accessories</h3>
+      <p>A multi-port car charger ensures every device stays powered up on longer trips.</p>
+
+      <h3>Interior Protection</h3>
+      <p>Seat covers and floor mats help protect your vehicle's interior from everyday wear.</p>
+
+      <h2>Shop Vehicle Accessories at Sellaap</h2>
+      <p>Explore our Vehicle Accessories category for gear that fits your ride.</p>
+    `
   }
 ];
 

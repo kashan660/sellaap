@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { getOrders, updateOrderStatus } from '@/lib/actions/order';
+import { retryCjFulfillment, refreshCjTracking } from '@/lib/actions/cj';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Loader2, Search, Eye, ChevronDown, ChevronUp } from 'lucide-react';
+import { Loader2, Search, Eye, ChevronDown, ChevronUp, Truck, RefreshCw } from 'lucide-react';
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -13,6 +14,7 @@ export default function AdminOrdersPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedOrder, setExpandedOrder] = useState<number | null>(null);
   const [updating, setUpdating] = useState<number | null>(null);
+  const [fulfilling, setFulfilling] = useState<number | null>(null);
 
   useEffect(() => {
     loadOrders();
@@ -47,7 +49,35 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const filteredOrders = orders.filter((order: any) => 
+  const handleRetryFulfillment = async (orderId: number) => {
+    setFulfilling(orderId);
+    try {
+      const result = await retryCjFulfillment(orderId);
+      if (result.success) {
+        loadOrders();
+      } else {
+        alert(result.error || 'Failed to submit order to CJ Dropshipping');
+      }
+    } finally {
+      setFulfilling(null);
+    }
+  };
+
+  const handleRefreshTracking = async (orderId: number) => {
+    setFulfilling(orderId);
+    try {
+      const result = await refreshCjTracking(orderId);
+      if (result.success) {
+        loadOrders();
+      } else {
+        alert(result.error || 'Failed to fetch tracking');
+      }
+    } finally {
+      setFulfilling(null);
+    }
+  };
+
+  const filteredOrders = orders.filter((order: any) =>
     order.id.toString().includes(searchTerm) ||
     order.user?.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order.user?.name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -169,6 +199,49 @@ export default function AdminOrdersPage() {
                           </div>
                         ))}
                       </div>
+
+                      {(order.shippingAddress1 || order.cjOrderId) && (
+                        <div className="mt-4 pt-4 border-t">
+                          <h4 className="font-semibold mb-3">Dropshipping Fulfillment</h4>
+                          <div className="text-sm space-y-1 mb-3">
+                            {order.shippingAddress1 && (
+                              <div className="text-muted-foreground">
+                                Ship to: {order.shippingName}, {order.shippingAddress1}
+                                {order.shippingAddress2 ? `, ${order.shippingAddress2}` : ''}, {order.shippingCity}, {order.shippingState} {order.shippingPostalCode}, {order.shippingCountry}
+                              </div>
+                            )}
+                            <div>Fulfillment status: <span className="font-medium">{order.fulfillmentStatus}</span></div>
+                            {order.cjOrderId && <div>CJ order id: <span className="font-mono">{order.cjOrderId}</span></div>}
+                            {order.trackingNumber && (
+                              <div>Tracking: <span className="font-mono">{order.trackingNumber}</span> ({order.trackingCarrier || 'unknown carrier'})</div>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            {order.fulfillmentStatus !== 'SHIPPED' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleRetryFulfillment(order.id)}
+                                disabled={fulfilling === order.id}
+                              >
+                                {fulfilling === order.id ? <Loader2 className="w-3 h-3 mr-2 animate-spin" /> : <Truck className="w-3 h-3 mr-2" />}
+                                Retry CJ fulfillment
+                              </Button>
+                            )}
+                            {order.cjOrderId && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleRefreshTracking(order.id)}
+                                disabled={fulfilling === order.id}
+                              >
+                                {fulfilling === order.id ? <Loader2 className="w-3 h-3 mr-2 animate-spin" /> : <RefreshCw className="w-3 h-3 mr-2" />}
+                                Refresh tracking
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

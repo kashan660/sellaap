@@ -19,6 +19,12 @@ const ProductSchema = z.object({
   fallbackImage: z.string().default("/placeholder.png"),
   features: z.string().optional(), // JSON string
   isFeatured: z.coerce.boolean().optional(),
+  isBestseller: z.coerce.boolean().optional(),
+  compareAtPrice: z.coerce.number().min(0).optional().nullable(),
+  digitalFileUrl: z.string().optional(),
+  digitalFileName: z.string().optional(),
+  digitalFileSize: z.coerce.number().optional(),
+  digitalFileMimeType: z.string().optional(),
 });
 
 export async function createProduct(formData: FormData) {
@@ -50,15 +56,21 @@ export async function createProduct(formData: FormData) {
     fallbackImage: formData.get('fallbackImage') || '/placeholder.png',
     features: formData.get('features'),
     isFeatured: formData.get('isFeatured') === 'true',
+    isBestseller: formData.get('isBestseller') === 'true',
+    compareAtPrice: formData.get('compareAtPrice') || undefined,
+    digitalFileUrl: formData.get('digitalFileUrl') || undefined,
+    digitalFileName: formData.get('digitalFileName') || undefined,
+    digitalFileSize: formData.get('digitalFileSize') || undefined,
+    digitalFileMimeType: formData.get('digitalFileMimeType') || undefined,
   };
 
-  const regionalAvailability = formData.get('regionalAvailability') 
-      ? JSON.parse(formData.get('regionalAvailability') as string) 
+  const regionalAvailability = formData.get('regionalAvailability')
+      ? JSON.parse(formData.get('regionalAvailability') as string)
       : [];
 
   try {
     const data = ProductSchema.parse(rawData);
-    
+
     const product = await prisma.product.create({
       data: {
         name: data.name,
@@ -71,6 +83,12 @@ export async function createProduct(formData: FormData) {
         fallbackImage: data.fallbackImage,
         features: data.features,
         isFeatured: data.isFeatured || false,
+        isBestseller: data.isBestseller || false,
+        compareAtPrice: data.compareAtPrice ?? null,
+        digitalFileUrl: data.digitalFileUrl,
+        digitalFileName: data.digitalFileName,
+        digitalFileSize: data.digitalFileSize,
+        digitalFileMimeType: data.digitalFileMimeType,
         regionalAvailability: {
             create: regionalAvailability.map((r: any) => ({
                 region: r.region,
@@ -134,15 +152,24 @@ export async function updateProduct(id: number, formData: FormData) {
     image: formData.get('image'),
     fallbackImage: formData.get('fallbackImage'),
     features: formData.get('features'),
+    isFeatured: formData.get('isFeatured') === 'true',
+    isBestseller: formData.get('isBestseller') === 'true',
+    compareAtPrice: formData.get('compareAtPrice') || undefined,
+    digitalFileUrl: formData.get('digitalFileUrl') || undefined,
+    digitalFileName: formData.get('digitalFileName') || undefined,
+    digitalFileSize: formData.get('digitalFileSize') || undefined,
+    digitalFileMimeType: formData.get('digitalFileMimeType') || undefined,
   };
 
-  const regionalAvailability = formData.get('regionalAvailability') 
-      ? JSON.parse(formData.get('regionalAvailability') as string) 
+  const digitalFileCleared = formData.get('digitalFileCleared') === 'true';
+
+  const regionalAvailability = formData.get('regionalAvailability')
+      ? JSON.parse(formData.get('regionalAvailability') as string)
       : undefined;
 
   try {
     const data = ProductSchema.parse(rawData);
-    
+
     const product = await prisma.product.update({
       where: { id },
       data: {
@@ -155,6 +182,19 @@ export async function updateProduct(id: number, formData: FormData) {
         image: data.image,
         fallbackImage: data.fallbackImage,
         features: data.features,
+        isFeatured: data.isFeatured || false,
+        isBestseller: data.isBestseller || false,
+        compareAtPrice: data.compareAtPrice ?? null,
+        ...(digitalFileCleared
+          ? { digitalFileUrl: null, digitalFileName: null, digitalFileSize: null, digitalFileMimeType: null }
+          : data.digitalFileUrl
+          ? {
+              digitalFileUrl: data.digitalFileUrl,
+              digitalFileName: data.digitalFileName,
+              digitalFileSize: data.digitalFileSize,
+              digitalFileMimeType: data.digitalFileMimeType,
+            }
+          : {}),
         ...(regionalAvailability ? {
             regionalAvailability: {
                 deleteMany: {},
@@ -240,11 +280,22 @@ export async function getCategories() {
     return categories;
 }
 
+// Top-level categories with their children, for nav menus and the category picker.
+export async function getCategoryTree() {
+  const categories = await prisma.category.findMany({
+    where: { parentId: null },
+    include: { children: { orderBy: { name: 'asc' } } },
+    orderBy: { name: 'asc' },
+  });
+  return categories;
+}
+
 const CategorySchema = z.object({
   name: z.string().min(1, "Name is required"),
   slug: z.string().min(1, "Slug is required"),
-  description: z.string().optional(),
-  image: z.string().optional(),
+  description: z.string().optional().nullable(),
+  image: z.string().optional().nullable(),
+  parentId: z.coerce.number().optional().nullable(),
 });
 
 import { createMenuItem } from './navigation';
@@ -255,11 +306,15 @@ export async function createCategory(formData: FormData) {
     return { error: "Unauthorized" };
   }
 
+  const parentIdRaw = formData.get('parentId');
+  const parentId = parentIdRaw && parentIdRaw !== '0' ? parentIdRaw : undefined;
+
   const rawData = {
     name: formData.get('name'),
     slug: formData.get('slug'),
     description: formData.get('description'),
     image: formData.get('image'),
+    parentId,
   };
 
   const menuPlacement = formData.get('menuPlacement');
@@ -274,6 +329,7 @@ export async function createCategory(formData: FormData) {
         slug: data.slug,
         description: data.description,
         image: data.image,
+        parentId: data.parentId,
       }
     });
 
@@ -315,15 +371,22 @@ export async function updateCategory(id: number, formData: FormData) {
     return { error: "Unauthorized" };
   }
 
+  const parentIdRaw = formData.get('parentId');
+  const parentId = parentIdRaw && parentIdRaw !== '0' ? parentIdRaw : null;
+
   const rawData = {
     name: formData.get('name'),
     slug: formData.get('slug'),
     description: formData.get('description'),
     image: formData.get('image'),
+    parentId,
   };
 
   try {
     const data = CategorySchema.parse(rawData);
+    if (data.parentId === id) {
+      return { error: "A category can't be its own parent" };
+    }
     const category = await prisma.category.update({
       where: { id },
       data: {
@@ -331,6 +394,7 @@ export async function updateCategory(id: number, formData: FormData) {
         slug: data.slug,
         description: data.description,
         image: data.image,
+        parentId: data.parentId,
       }
     });
     revalidatePath('/admin/categories');
@@ -380,6 +444,36 @@ export async function getFeaturedProducts() {
     return products;
   } catch (error) {
     console.error('Error fetching featured products:', error);
+    return [];
+  }
+}
+
+export async function getBestsellerProducts() {
+  try {
+    return await prisma.product.findMany({
+      where: { isBestseller: true },
+      include: { category: true },
+      orderBy: { updatedAt: 'desc' },
+      take: 8,
+    });
+  } catch (error) {
+    console.error('Error fetching bestseller products:', error);
+    return [];
+  }
+}
+
+export async function getDiscountedProducts() {
+  try {
+    const products = await prisma.product.findMany({
+      where: { compareAtPrice: { not: null } },
+      include: { category: true },
+      orderBy: { updatedAt: 'desc' },
+      take: 8,
+    });
+    // compareAtPrice must actually be higher than price for it to be a real discount
+    return products.filter((p) => p.compareAtPrice != null && p.compareAtPrice > p.price);
+  } catch (error) {
+    console.error('Error fetching discounted products:', error);
     return [];
   }
 }

@@ -1,9 +1,10 @@
 'use server';
 
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
+import { CACHE_CONFIG } from "@/lib/cache";
 
 export async function getSettings() {
   try {
@@ -23,6 +24,12 @@ export async function updateSettings(data: {
   twitterHandle?: string;
   googleVerification?: string;
   bingVerification?: string;
+  whatsappNumber?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  youtubeUrl?: string;
+  tiktokUrl?: string;
+  telegramUrl?: string;
 }) {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== 'ADMIN') {
@@ -49,6 +56,7 @@ export async function updateSettings(data: {
     }
     
     revalidatePath('/');
+    CACHE_CONFIG.settings.tags.forEach(tag => revalidateTag(tag, 'max'));
     return { success: true, settings };
   } catch (error) {
     console.error('Error updating settings:', error);

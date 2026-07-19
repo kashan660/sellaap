@@ -2,25 +2,28 @@ import { seoKeywords, contentTemplates } from '@/data/seo-keywords';
 
 export type Market = 'uk' | 'us' | 'canada' | 'europe' | 'australia';
 
+export function getSiteUrl(): string {
+  return process.env.NEXT_PUBLIC_SITE_URL || 'https://sellaap.com';
+}
+
 // Generate SEO-friendly meta tags for products
 export function generateProductMeta(product: any, location: Market = 'uk') {
-  const locationKeywords = seoKeywords[location];
-  const primaryKeyword = locationKeywords.primary[0];
-  const longTailKeyword = locationKeywords.longTail[0];
-  
+  const description = product.description
+    ? product.description.slice(0, 155)
+    : `Shop ${product.name} at Sellaap with fast US shipping and secure checkout.`;
+
   return {
-    title: `${product.name} - ${primaryKeyword} | Sellaap ${location.toUpperCase()}`,
-    description: `${contentTemplates.metaDescriptions[location]} Get ${product.name} with professional setup. ${longTailKeyword}.`,
+    title: product.name,
+    description,
     keywords: [
-      ...locationKeywords.primary.slice(0, 3),
-      ...locationKeywords.longTail.slice(0, 2),
-      product.name.toLowerCase().replace(/\s+/g, '-'),
-      'firestick-setup',
-      'streaming-device'
-    ].join(', '),
+      product.name.toLowerCase(),
+      product.category?.name?.toLowerCase(),
+      'online store USA',
+      'fast US shipping',
+    ].filter(Boolean).join(', '),
     openGraph: {
-      title: `${product.name} - Professional Firestick Setup Service`,
-      description: `${contentTemplates.metaDescriptions[location]} Get ${product.name} with lifetime support.`,
+      title: product.name,
+      description,
       type: 'website',
       images: product.image ? [product.image] : [product.fallbackImage],
       siteName: 'Sellaap',
@@ -28,8 +31,8 @@ export function generateProductMeta(product: any, location: Market = 'uk') {
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${product.name} - Firestick Setup Service`,
-      description: `${contentTemplates.metaDescriptions[location]}`,
+      title: product.name,
+      description,
       images: product.image ? [product.image] : [product.fallbackImage],
     }
   };
@@ -55,25 +58,34 @@ export function generateProductStructuredData(product: any, location: Market = '
         '@type': 'Organization',
         name: 'Sellaap'
       }
-    },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.8',
-      reviewCount: '127'
-    },
-    review: {
-      '@type': 'Review',
-      reviewRating: {
-        '@type': 'Rating',
-        ratingValue: '5',
-        bestRating: '5'
-      },
-      author: {
-        '@type': 'Person',
-        name: 'Happy Customer'
-      },
-      reviewBody: `Excellent ${product.name} setup service. Professional installation with lifetime support.`
     }
+  };
+}
+
+// Generate Organization structured data, site-wide
+export function generateOrganizationStructuredData(socialLinks: string[] = []) {
+  const baseUrl = getSiteUrl();
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Sellaap',
+    url: baseUrl,
+    logo: `${baseUrl}/logo.png`,
+    sameAs: socialLinks.length > 0 ? socialLinks : undefined,
+  };
+}
+
+// Generate BreadcrumbList structured data
+export function generateBreadcrumbStructuredData(items: Array<{ name: string; url: string }>) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: item.url,
+    })),
   };
 }
 
@@ -134,20 +146,15 @@ export function generateBlogMeta(post: any, location: Market = 'uk') {
 
 // Generate category meta tags
 export function generateCategoryMeta(category: any, location: Market = 'uk') {
-  const locationKeywords = seoKeywords[location];
-  
+  const description = category.description || `Browse our ${category.name} collection at Sellaap, with fast US shipping and secure checkout.`;
+
   return {
-    title: `${category.name} - ${locationKeywords.primary[0]} | Sellaap ${location.toUpperCase()}`,
-    description: `Browse our ${category.name} collection. ${contentTemplates.metaDescriptions[location]}`,
-    keywords: [
-      category.name.toLowerCase(),
-      ...locationKeywords.primary.slice(0, 2),
-      'firestick-categories',
-      'streaming-products'
-    ].join(', '),
+    title: category.name,
+    description,
+    keywords: [category.name.toLowerCase(), 'online store USA', 'fast US shipping'].join(', '),
     openGraph: {
-      title: `${category.name} - Firestick Products`,
-      description: `Discover our ${category.name} collection with professional setup services.`,
+      title: category.name,
+      description,
       type: 'website',
       siteName: 'Sellaap',
       locale: getLocale(location)
@@ -209,16 +216,17 @@ function getCurrency(location: Market): string {
 
 // Generate hreflang tags for international SEO
 export function generateHreflangTags(path: string, markets: Market[] = ['uk', 'us', 'canada', 'europe', 'australia']) {
+  const baseUrl = getSiteUrl();
   return markets.map(market => ({
     rel: 'alternate',
     hrefLang: getLocale(market).replace('_', '-'),
-    href: `https://sellaap.vercel.app/${market}${path}`
+    href: `${baseUrl}/${market}${path}`
   }));
 }
 
 // Generate canonical URL for international pages
 export function generateCanonicalUrl(path: string, market: Market) {
-  return `https://sellaap.vercel.app/${market}${path}`;
+  return `${getSiteUrl()}/${market}${path}`;
 }
 
 // Create FAQ content for different markets

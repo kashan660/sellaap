@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { fulfillOrderWithCj } from "@/lib/actions/cj";
 
 function timingSafeEqual(a: string, b: string) {
   const aBuf = Buffer.from(a);
@@ -65,6 +66,7 @@ export async function POST(req: NextRequest) {
         where: { id: orderId },
         data: { status: "COMPLETED" },
       });
+      await fulfillOrderWithCj(orderId);
     } else if (eventType === "transaction.payment_failed") {
       await prisma.order.update({
         where: { id: orderId },

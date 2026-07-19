@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { generateLocationMeta, generateMarketFAQs, generateHreflangTags } from '@/lib/seo-utils';
+import { generateLocationMeta, generateMarketFAQs, generateHreflangTags, getSiteUrl } from '@/lib/seo-utils';
 import { seoKeywords, blogTopics } from '@/data/seo-keywords';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
@@ -39,14 +39,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: meta.description,
     keywords: meta.keywords,
     alternates: {
-      canonical: `https://sellaap.vercel.app/${location}`,
+      canonical: `${getSiteUrl()}/${location}`,
       languages: Object.fromEntries(
         hreflangTags.map(tag => [tag.hrefLang, tag.href])
       )
     },
     openGraph: {
       ...meta.openGraph,
-      url: `https://sellaap.vercel.app/${location}`,
+      url: `${getSiteUrl()}/${location}`,
       images: ['/og-image-location.jpg']
     },
     twitter: meta.twitter

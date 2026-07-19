@@ -82,19 +82,15 @@ export const getCachedProductBySlug = unstable_cache(
 
 export const getCachedFeaturedProducts = unstable_cache(
   async (limit = 3) => {
-    // Logic to get featured products
-    // For now, we'll fetch all and filter, but in a real app we'd query specifically
-    const products = await prisma.product.findMany({
+    return prisma.product.findMany({
+      where: { isFeatured: true },
       include: {
         category: true,
         regionalAvailability: true
       },
-      orderBy: { id: 'asc' }
+      orderBy: { updatedAt: 'desc' },
+      take: limit,
     });
-    
-    // Featured logic (e.g. specific IDs or marked as featured)
-    const featuredIds = [1, 4, 5];
-    return products.filter((p: any) => featuredIds.includes(p.id)).slice(0, limit);
   },
   ['products-featured'],
   { ...CACHE_CONFIG.products, revalidate: 1800 } // 30 mins

@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { getPaddleMapByProductId, syncProductToPaddleCatalog } from "@/lib/paddle-catalog";
 import { getPaddleApiBaseUrl } from "@/lib/paddle-api";
+import { fulfillOrderWithCj } from "@/lib/actions/cj";
 
 function normalizeCheckoutUrl(rawUrl: string | null | undefined, transactionId: string | null | undefined) {
   if (rawUrl) {
@@ -18,7 +19,18 @@ function normalizeCheckoutUrl(rawUrl: string | null | undefined, transactionId: 
   return rawUrl || "";
 }
 
-export async function createOrder(items: any[], total: number, paymentMethod: string) {
+export interface ShippingInfo {
+  name: string;
+  phone: string;
+  address1: string;
+  address2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+}
+
+export async function createOrder(items: any[], total: number, paymentMethod: string, shipping?: ShippingInfo) {
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -43,6 +55,7 @@ export async function createOrder(items: any[], total: number, paymentMethod: st
     // Validate each item against database
     let calculatedTotal = 0;
     const validatedItems = [];
+    let requiresShipping = false;
 
     for (const item of items) {
       if (!item.id || !item.quantity || !item.price) {
@@ -60,11 +73,15 @@ export async function createOrder(items: any[], total: number, paymentMethod: st
       // Check if product exists in database
       const product = await prisma.product.findUnique({
         where: { id: item.id },
-        select: { id: true, price: true }
+        select: { id: true, price: true, sourceType: true }
       });
 
       if (!product) {
         return { error: `Product ${item.id} not found` };
+      }
+
+      if (product.sourceType === 'CJ') {
+        requiresShipping = true;
       }
 
       // Verify price hasn't been tampered with (allow 1% variance for rounding)
@@ -88,6 +105,12 @@ export async function createOrder(items: any[], total: number, paymentMethod: st
       return { error: "Total amount mismatch" };
     }
 
+    if (requiresShipping) {
+      if (!shipping?.name || !shipping.address1 || !shipping.city || !shipping.postalCode || !shipping.phone) {
+        return { error: "Shipping address is required for the physical products in this order" };
+      }
+    }
+
     // Create order with validated data
     const order = await prisma.order.create({
       data: {
@@ -96,17 +119,21 @@ export async function createOrder(items: any[], total: number, paymentMethod: st
         currency: "USD",
         status: "PENDING", // Changed to PENDING for manual payment verification
         paymentMethod: paymentMethod.toLowerCase(),
+        ...(shipping ? {
+          shippingName: shipping.name,
+          shippingPhone: shipping.phone,
+          shippingAddress1: shipping.address1,
+          shippingAddress2: shipping.address2 || null,
+          shippingCity: shipping.city,
+          shippingState: shipping.state,
+          shippingPostalCode: shipping.postalCode,
+          shippingCountry: shipping.country || "US",
+        } : {}),
         items: {
           create: validatedItems,
         },
       },
     });
-
-    // Note: Stock management removed as Product model doesn't have stock field
-    // In a production environment, you would either:
-    // 1. Add a stock field to the Product model
-    // 2. Implement stock management in a separate Stock model
-    // 3. Handle inventory through a different system
 
     return { success: true, orderId: order.id };
   } catch (error) {
@@ -465,6 +492,11 @@ export async function updateOrderStatus(id: number, status: string) {
       where: { id },
       data: { status }
     });
+
+    if (status.toUpperCase() === 'COMPLETED') {
+      await fulfillOrderWithCj(id);
+    }
+
     revalidatePath('/admin/orders');
     return { success: true, order };
   } catch (error) {

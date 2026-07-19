@@ -12,6 +12,7 @@ import { LanguageSelector } from "./LanguageSelector";
 import { CurrencySelector } from "./CurrencySelector";
 
 import { getMenus } from "@/lib/actions/navigation";
+import { getCategoryTree } from "@/lib/actions/products";
 
 interface MenuItem {
   id: number;
@@ -20,43 +21,35 @@ interface MenuItem {
   children?: MenuItem[];
 }
 
+interface CategoryNode {
+  id: number;
+  name: string;
+  slug: string;
+  children: { id: number; name: string; slug: string }[];
+}
+
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isCategoriesDropdownOpen, setIsCategoriesDropdownOpen] = useState(false);
-  const [categories, setCategories] = useState<Array<{id: number, name: string, slug: string}>>([]);
+  const [categoryTree, setCategoryTree] = useState<CategoryNode[]>([]);
+  const [expandedCategoryId, setExpandedCategoryId] = useState<number | null>(null);
   const [dynamicMenuItems, setDynamicMenuItems] = useState<MenuItem[]>([]);
   const { setIsCartOpen, cartCount } = useCart();
   const { data: session } = useSession();
   const { t } = useLanguage();
 
   useEffect(() => {
-    // Fetch categories for dropdown
-    fetch('/api/categories')
-      .then(res => {
-        // ... existing logic ...
-        return res.json();
-      })
-      .then(data => {
-        // ... existing logic ...
-        if (data.categories && Array.isArray(data.categories)) {
-          setCategories(data.categories);
-        } else {
-           // ... fallback ...
-           setCategories([
-            { id: 1, name: 'Blender 3D Models', slug: 'blender-3d-models' },
-            { id: 2, name: 'Digital Products', slug: 'digital-products' },
-            { id: 3, name: 'Software', slug: 'software' },
-            { id: 4, name: 'Templates', slug: 'templates' }
-          ]);
-        }
-      })
-      .catch(error => {
-        // ... fallback ...
-         setCategories([
-          { id: 1, name: 'Blender 3D Models', slug: 'blender-3d-models' },
-          { id: 2, name: 'Digital Products', slug: 'digital-products' },
-          { id: 3, name: 'Software', slug: 'software' },
-          { id: 4, name: 'Templates', slug: 'templates' }
+    // Fetch the real category tree (top-level + subcategories) for the Products dropdown
+    getCategoryTree()
+      .then((tree) => setCategoryTree(tree))
+      .catch((error) => {
+        console.error('Error fetching category tree:', error);
+        setCategoryTree([
+          { id: 1, name: 'Pet Supplies', slug: 'pet-supplies', children: [] },
+          { id: 2, name: 'Beauty', slug: 'beauty', children: [] },
+          { id: 3, name: 'Electronics', slug: 'electronics', children: [] },
+          { id: 4, name: 'Home Equipment', slug: 'home-equipment', children: [] },
+          { id: 5, name: 'Vehicle Accessories', slug: 'vehicle-accessories', children: [] },
         ]);
       });
 
@@ -106,27 +99,51 @@ export function Navbar() {
               </button>
               
               {isCategoriesDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 w-56 bg-card border rounded-md shadow-lg py-1 z-50" style={{ display: 'block' }}>
-                  <Link 
-                    href="/products" 
+                <div className="absolute top-full left-0 mt-2 w-64 bg-card border rounded-md shadow-lg py-1 z-50" style={{ display: 'block' }}>
+                  <Link
+                    href="/products"
                     className="block px-4 py-2 text-sm hover:bg-muted font-medium"
                     onClick={() => setIsCategoriesDropdownOpen(false)}
                   >
                     {t('nav.allProducts')}
                   </Link>
                   <div className="border-t border-border my-1"></div>
-                  {categories.length > 0 ? (
-                     categories.map((category) => (
-                       <Link 
-                         key={category.id}
-                         href={`/products/${category.slug}`}
-                         className="block px-4 py-2 text-sm hover:bg-muted"
-                         onClick={(e) => {
-                           setIsCategoriesDropdownOpen(false);
-                         }}
-                       >
-                         {category.name}
-                       </Link>
+                  {categoryTree.length > 0 ? (
+                     categoryTree.map((category) => (
+                       <div key={category.id}>
+                         <div className="flex items-center justify-between hover:bg-muted">
+                           <Link
+                             href={`/products/${category.slug}`}
+                             className="flex-1 block px-4 py-2 text-sm"
+                             onClick={() => setIsCategoriesDropdownOpen(false)}
+                           >
+                             {category.name}
+                           </Link>
+                           {category.children.length > 0 && (
+                             <button
+                               onClick={() => setExpandedCategoryId(expandedCategoryId === category.id ? null : category.id)}
+                               className="px-3 py-2 focus:outline-none"
+                               aria-label={`Toggle ${category.name} subcategories`}
+                             >
+                               <ChevronDown size={14} className={`transition-transform ${expandedCategoryId === category.id ? 'rotate-180' : ''}`} />
+                             </button>
+                           )}
+                         </div>
+                         {expandedCategoryId === category.id && category.children.length > 0 && (
+                           <div className="bg-muted/30">
+                             {category.children.map((child) => (
+                               <Link
+                                 key={child.id}
+                                 href={`/products/${child.slug}`}
+                                 className="block pl-8 pr-4 py-2 text-sm hover:bg-muted"
+                                 onClick={() => setIsCategoriesDropdownOpen(false)}
+                               >
+                                 {child.name}
+                               </Link>
+                             ))}
+                           </div>
+                         )}
+                       </div>
                      ))
                    ) : (
                      <div className="px-4 py-2 text-sm text-muted-foreground">No categories found</div>
@@ -234,26 +251,45 @@ export function Navbar() {
                 </button>
                 {isCategoriesDropdownOpen && (
                   <div className="pl-4 space-y-1">
-                    <Link 
-                      href="/products" 
+                    <Link
+                      href="/products"
                       className="block px-3 py-2 text-sm text-foreground/70 hover:text-primary"
                       onClick={() => {setIsCategoriesDropdownOpen(false); setIsOpen(false);}}
                     >
                       {t('nav.allProducts')}
                     </Link>
-                    {categories.length > 0 ? (
-                       categories.map((category) => (
-                         <Link 
-                           key={category.id}
-                           href={`/products/${category.slug}`}
-                           className="block px-3 py-2 text-sm text-foreground/70 hover:text-primary"
-                           onClick={(e) => {
-                             setIsCategoriesDropdownOpen(false);
-                             setIsOpen(false);
-                           }}
-                         >
-                           {category.name}
-                         </Link>
+                    {categoryTree.length > 0 ? (
+                       categoryTree.map((category) => (
+                         <div key={category.id}>
+                           <div className="flex items-center justify-between">
+                             <Link
+                               href={`/products/${category.slug}`}
+                               className="flex-1 block px-3 py-2 text-sm text-foreground/70 hover:text-primary"
+                               onClick={() => { setIsCategoriesDropdownOpen(false); setIsOpen(false); }}
+                             >
+                               {category.name}
+                             </Link>
+                             {category.children.length > 0 && (
+                               <button
+                                 onClick={() => setExpandedCategoryId(expandedCategoryId === category.id ? null : category.id)}
+                                 className="px-3 py-2 focus:outline-none"
+                                 aria-label={`Toggle ${category.name} subcategories`}
+                               >
+                                 <ChevronDown size={14} className={`transition-transform ${expandedCategoryId === category.id ? 'rotate-180' : ''}`} />
+                               </button>
+                             )}
+                           </div>
+                           {expandedCategoryId === category.id && category.children.map((child) => (
+                             <Link
+                               key={child.id}
+                               href={`/products/${child.slug}`}
+                               className="block pl-8 pr-3 py-2 text-sm text-foreground/60 hover:text-primary"
+                               onClick={() => { setIsCategoriesDropdownOpen(false); setIsOpen(false); }}
+                             >
+                               {child.name}
+                             </Link>
+                           ))}
+                         </div>
                        ))
                      ) : (
                        <div className="px-3 py-2 text-sm text-muted-foreground">No categories found</div>

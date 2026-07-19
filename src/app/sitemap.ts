@@ -1,185 +1,92 @@
 import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
+import { getSiteUrl } from '@/lib/seo-utils';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://sellaap.vercel.app';
+  const baseUrl = getSiteUrl();
+
   let products: Array<{ slug: string; updatedAt: Date | string }> = [];
   let posts: Array<{ slug: string; updatedAt: Date | string }> = [];
   let categories: Array<{ slug: string; updatedAt: Date | string }> = [];
-  let pageSeo: Array<{ path: string; updatedAt: Date | string }> = [];
+  let pages: Array<{ slug: string; updatedAt: Date | string }> = [];
 
   try {
-    const [dbProducts, dbPosts, dbCategories, dbPageSeo] = await Promise.all([
+    const [dbProducts, dbPosts, dbCategories, dbPages] = await Promise.all([
       prisma.product.findMany({
         select: { slug: true, updatedAt: true },
-        orderBy: { updatedAt: 'desc' }
+        orderBy: { updatedAt: 'desc' },
       }),
       prisma.post.findMany({
+        where: { status: 'PUBLISHED' },
         select: { slug: true, updatedAt: true },
-        orderBy: { updatedAt: 'desc' }
+        orderBy: { updatedAt: 'desc' },
       }),
       prisma.category.findMany({
         select: { slug: true, updatedAt: true },
-        orderBy: { updatedAt: 'desc' }
+        orderBy: { updatedAt: 'desc' },
       }),
-      (prisma as any).pageSeo?.findMany?.({
-        select: { path: true, updatedAt: true },
-        orderBy: { updatedAt: 'desc' }
-      }) ?? Promise.resolve([])
+      prisma.page.findMany({
+        where: { status: 'PUBLISHED' },
+        select: { slug: true, updatedAt: true },
+        orderBy: { updatedAt: 'desc' },
+      }),
     ]);
 
     products = dbProducts;
     posts = dbPosts;
     categories = dbCategories;
-    pageSeo = dbPageSeo;
+    pages = dbPages;
   } catch (error) {
     console.error('Sitemap fallback: failed to read DB content', error);
   }
-  
-  // Define markets for international SEO
-  const markets = ['uk', 'us', 'canada', 'europe', 'australia'];
-  
-  // Static pages with high priority
+
+  // Only routes that actually exist in src/app. Categories are resolved
+  // through the same /products/[slug] catch-all route, not a separate /categories path.
   const staticPages: MetadataRoute.Sitemap = [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/products`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/blog`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/contact`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/about`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
+    { url: baseUrl, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },
+    { url: `${baseUrl}/products`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+    { url: `${baseUrl}/blog`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${baseUrl}/privacy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${baseUrl}/terms`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${baseUrl}/refund`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
   ];
-  
-  // Location-specific landing pages
-  const locationPages: MetadataRoute.Sitemap = markets.map((market: string) => ({
+
+  const markets = ['uk', 'us', 'canada', 'europe', 'australia'];
+  const marketPages: MetadataRoute.Sitemap = markets.map((market) => ({
     url: `${baseUrl}/${market}`,
     lastModified: new Date(),
     changeFrequency: 'weekly',
-    priority: 0.9,
+    priority: 0.8,
   }));
-  
-  // Location-specific products
-  const locationProducts: MetadataRoute.Sitemap = markets.flatMap((market: string) => 
-    products.map((product: any) => ({
-      url: `${baseUrl}/${market}/products/${product.slug}`,
-      lastModified: product.updatedAt,
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    }))
-  );
-  
-  // Location-specific blog posts
-  const locationPosts: MetadataRoute.Sitemap = markets.flatMap((market: string) => 
-    posts.map((post: any) => ({
-      url: `${baseUrl}/${market}/blog/${post.slug}`,
-      lastModified: post.updatedAt,
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    }))
-  );
-  
-  // Location-specific categories
-  const locationCategories: MetadataRoute.Sitemap = markets.flatMap((market: string) => 
-    categories.map((category: any) => ({
-      url: `${baseUrl}/${market}/categories/${category.slug}`,
-      lastModified: category.updatedAt,
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    }))
-  );
-  
-  // Location-specific pages
-  const locationPagesSeo: MetadataRoute.Sitemap = markets.flatMap((market: string) => 
-    pageSeo.map((page: any) => ({
-      url: `${baseUrl}/${market}${page.path}`,
-      lastModified: page.updatedAt,
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    }))
-  );
-  
-  // Blog categories and tags (if they exist)
-  const blogTaxonomy: MetadataRoute.Sitemap = [
-    {
-      url: `${baseUrl}/blog/category/firestick-setup`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/blog/category/streaming-guides`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/blog/category/product-reviews`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/blog/tag/firestick-4k-max`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/blog/tag/setup-guide`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/blog/tag/streaming-apps`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.5,
-    },
-  ];
-  
-  // International versions of blog taxonomy
-  const internationalBlogTaxonomy: MetadataRoute.Sitemap = markets.flatMap((market: string) => 
-    blogTaxonomy.map((page: any) => ({
-      url: page.url.replace(baseUrl, `${baseUrl}/${market}`),
-      lastModified: page.lastModified,
-      changeFrequency: page.changeFrequency as any,
-      priority: page.priority,
-    }))
-  );
-  
-  // Combine all sitemap entries
-  return [
-    ...staticPages,
-    ...locationPages,
-    ...locationProducts,
-    ...locationPosts,
-    ...locationCategories,
-    ...locationPagesSeo,
-    ...blogTaxonomy,
-    ...internationalBlogTaxonomy,
-  ];
+
+  const productPages: MetadataRoute.Sitemap = products.map((p) => ({
+    url: `${baseUrl}/products/${p.slug}`,
+    lastModified: p.updatedAt,
+    changeFrequency: 'weekly',
+    priority: 0.8,
+  }));
+
+  const categoryPages: MetadataRoute.Sitemap = categories.map((c) => ({
+    url: `${baseUrl}/products/${c.slug}`,
+    lastModified: c.updatedAt,
+    changeFrequency: 'weekly',
+    priority: 0.7,
+  }));
+
+  const postPages: MetadataRoute.Sitemap = posts.map((p) => ({
+    url: `${baseUrl}/blog/${p.slug}`,
+    lastModified: p.updatedAt,
+    changeFrequency: 'monthly',
+    priority: 0.6,
+  }));
+
+  const cmsPages: MetadataRoute.Sitemap = pages.map((p) => ({
+    url: `${baseUrl}/pages/${p.slug}`,
+    lastModified: p.updatedAt,
+    changeFrequency: 'monthly',
+    priority: 0.5,
+  }));
+
+  return [...staticPages, ...marketPages, ...productPages, ...categoryPages, ...postPages, ...cmsPages];
 }

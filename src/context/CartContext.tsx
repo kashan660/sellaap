@@ -11,6 +11,7 @@ export type CartItem = {
   currency: string;
   image: string;
   quantity: number;
+  sourceType: string;
 };
 
 type CartContextType = {
@@ -69,7 +70,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
           price: product.price,
           currency: product.currency,
           image: product.image || '/placeholder.png',
-          quantity: 1
+          quantity: 1,
+          sourceType: product.sourceType,
       }];
     });
     setIsCartOpen(true);

@@ -9,11 +9,12 @@ import {
   FileText, 
   Image as ImageIcon, 
   Menu, 
-  Shuffle, 
-  Settings, 
+  Shuffle,
+  Settings,
   LogOut,
   ShoppingCart,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Truck
 } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 
@@ -22,6 +23,7 @@ const menuItems = [
   { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   { href: '/admin/payment-links', label: 'Payment Links', icon: LinkIcon },
   { href: '/admin/products', label: 'Products', icon: Package },
+  { href: '/admin/dropship', label: 'Dropship', icon: Truck },
   { href: '/admin/categories', label: 'Categories', icon: Tags },
   { href: '/admin/pages', label: 'Pages', icon: FileText },
   { href: '/admin/blogs', label: 'Blog Posts', icon: FileText },

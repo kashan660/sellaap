@@ -22,7 +22,13 @@ export default function AdminSettingsPage() {
     ogImage: '',
     twitterHandle: '',
     googleVerification: '',
-    bingVerification: ''
+    bingVerification: '',
+    whatsappNumber: '',
+    facebookUrl: '',
+    instagramUrl: '',
+    youtubeUrl: '',
+    tiktokUrl: '',
+    telegramUrl: ''
   });
 
   const [paymentData, setPaymentData] = useState({
@@ -59,7 +65,13 @@ export default function AdminSettingsPage() {
             ogImage: seoData.ogImage || '',
             twitterHandle: seoData.twitterHandle || '',
             googleVerification: seoData.googleVerification || '',
-            bingVerification: seoData.bingVerification || ''
+            bingVerification: seoData.bingVerification || '',
+            whatsappNumber: seoData.whatsappNumber || '',
+            facebookUrl: seoData.facebookUrl || '',
+            instagramUrl: seoData.instagramUrl || '',
+            youtubeUrl: seoData.youtubeUrl || '',
+            tiktokUrl: seoData.tiktokUrl || '',
+            telegramUrl: seoData.telegramUrl || ''
         });
       }
 
@@ -225,6 +237,66 @@ export default function AdminSettingsPage() {
                 value={formData.twitterHandle}
                 onChange={(e) => setFormData(prev => ({ ...prev, twitterHandle: e.target.value }))}
                 placeholder="@sellaap"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="whatsappNumber">WhatsApp Number (digits only, with country code)</Label>
+              <Input
+                id="whatsappNumber"
+                value={formData.whatsappNumber}
+                onChange={(e) => setFormData(prev => ({ ...prev, whatsappNumber: e.target.value }))}
+                placeholder="447454288184"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="facebookUrl">Facebook URL</Label>
+              <Input
+                id="facebookUrl"
+                value={formData.facebookUrl}
+                onChange={(e) => setFormData(prev => ({ ...prev, facebookUrl: e.target.value }))}
+                placeholder="https://facebook.com/sellaap"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="instagramUrl">Instagram URL</Label>
+              <Input
+                id="instagramUrl"
+                value={formData.instagramUrl}
+                onChange={(e) => setFormData(prev => ({ ...prev, instagramUrl: e.target.value }))}
+                placeholder="https://instagram.com/sellaap"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="youtubeUrl">YouTube URL</Label>
+              <Input
+                id="youtubeUrl"
+                value={formData.youtubeUrl}
+                onChange={(e) => setFormData(prev => ({ ...prev, youtubeUrl: e.target.value }))}
+                placeholder="https://youtube.com/@sellaap"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="tiktokUrl">TikTok URL</Label>
+              <Input
+                id="tiktokUrl"
+                value={formData.tiktokUrl}
+                onChange={(e) => setFormData(prev => ({ ...prev, tiktokUrl: e.target.value }))}
+                placeholder="https://tiktok.com/@sellaap"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="telegramUrl">Telegram URL</Label>
+              <Input
+                id="telegramUrl"
+                value={formData.telegramUrl}
+                onChange={(e) => setFormData(prev => ({ ...prev, telegramUrl: e.target.value }))}
+                placeholder="https://t.me/sellaap"
               />
             </div>
 

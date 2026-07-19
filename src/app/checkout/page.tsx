@@ -16,6 +16,17 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [paymentSettings, setPaymentSettings] = useState<any>(null);
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+  const requiresShipping = items.some((item) => item.sourceType === 'CJ');
+  const [shipping, setShipping] = useState({
+    name: '',
+    phone: '',
+    address1: '',
+    address2: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: 'US',
+  });
   const manualPaymentsEnabled = !!paymentSettings && (
     paymentSettings.isPaypalEnabled || 
     paymentSettings.isPayoneerEnabled || 
@@ -54,9 +65,14 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (requiresShipping && (!shipping.name || !shipping.phone || !shipping.address1 || !shipping.city || !shipping.postalCode)) {
+      alert("Please fill in your shipping address (this order contains a physical product)");
+      return;
+    }
+
     setLoading(true);
     try {
-      const result = await createOrder(items, cartTotal, selectedMethod);
+      const result = await createOrder(items, cartTotal, selectedMethod, requiresShipping ? shipping : undefined);
       if (result.success) {
         if (selectedMethod === 'PADDLE') {
           const paddleResult = await createPaddleCheckout(result.orderId);
@@ -107,7 +123,63 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        <div>
+        <div className="space-y-8">
+          {requiresShipping && (
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Shipping Address (US only)</h2>
+              <div className="bg-card border rounded-lg p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input
+                  className="border rounded-md px-3 py-2 sm:col-span-2"
+                  placeholder="Full name"
+                  value={shipping.name}
+                  onChange={(e) => setShipping((s) => ({ ...s, name: e.target.value }))}
+                />
+                <input
+                  className="border rounded-md px-3 py-2 sm:col-span-2"
+                  placeholder="Phone number"
+                  value={shipping.phone}
+                  onChange={(e) => setShipping((s) => ({ ...s, phone: e.target.value }))}
+                />
+                <input
+                  className="border rounded-md px-3 py-2 sm:col-span-2"
+                  placeholder="Address line 1"
+                  value={shipping.address1}
+                  onChange={(e) => setShipping((s) => ({ ...s, address1: e.target.value }))}
+                />
+                <input
+                  className="border rounded-md px-3 py-2 sm:col-span-2"
+                  placeholder="Address line 2 (optional)"
+                  value={shipping.address2}
+                  onChange={(e) => setShipping((s) => ({ ...s, address2: e.target.value }))}
+                />
+                <input
+                  className="border rounded-md px-3 py-2"
+                  placeholder="City"
+                  value={shipping.city}
+                  onChange={(e) => setShipping((s) => ({ ...s, city: e.target.value }))}
+                />
+                <input
+                  className="border rounded-md px-3 py-2"
+                  placeholder="State"
+                  value={shipping.state}
+                  onChange={(e) => setShipping((s) => ({ ...s, state: e.target.value }))}
+                />
+                <input
+                  className="border rounded-md px-3 py-2"
+                  placeholder="ZIP / Postal code"
+                  value={shipping.postalCode}
+                  onChange={(e) => setShipping((s) => ({ ...s, postalCode: e.target.value }))}
+                />
+                <input
+                  className="border rounded-md px-3 py-2 bg-muted"
+                  value="United States"
+                  disabled
+                />
+              </div>
+            </div>
+          )}
+
+          <div>
           <h2 className="text-xl font-semibold mb-4">Payment Details</h2>
           <div className="bg-card border rounded-lg p-6 space-y-6">
              {paymentSettings && !manualPaymentsEnabled && (
@@ -231,6 +303,7 @@ export default function CheckoutPage() {
              >
                {loading ? "Processing..." : "Place Order"}
              </button>
+          </div>
           </div>
         </div>
       </div>

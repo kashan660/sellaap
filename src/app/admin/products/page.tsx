@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createProduct, updateProduct, deleteProduct, getProductsAction, getCategories, syncProductToPaddle } from '@/lib/actions/products';
+import { syncCjProduct } from '@/lib/actions/cj';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,8 +22,10 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from '@/components/ui/dialog';
-import { Plus, Edit, Trash2, Eye, Save, X, Search, RefreshCw } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Save, X, Search, RefreshCw, Truck } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
+import FileUpload from '@/components/FileUpload';
+import { slugify } from '@/lib/slugify';
 import Image from 'next/image';
 import { Product, Category, ProductRegion } from '@prisma/client';
 
@@ -52,6 +55,12 @@ export default function AdminProductsPage() {
     fallbackImage: '/placeholder.png',
     features: '[]',
     isFeatured: false,
+    isBestseller: false,
+    compareAtPrice: '',
+    digitalFileUrl: '',
+    digitalFileName: '',
+    digitalFileSize: 0,
+    digitalFileMimeType: '',
     regionalAvailability: REGIONS.map(r => ({
       region: r,
       available: true,
@@ -59,6 +68,7 @@ export default function AdminProductsPage() {
       currency: ''
     }))
   });
+  const [digitalFileCleared, setDigitalFileCleared] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -95,7 +105,18 @@ export default function AdminProductsPage() {
     data.append('fallbackImage', formData.fallbackImage);
     data.append('features', formData.features);
     data.append('isFeatured', String(formData.isFeatured));
-    
+    data.append('isBestseller', String(formData.isBestseller));
+    if (formData.compareAtPrice) data.append('compareAtPrice', formData.compareAtPrice);
+    if (formData.digitalFileUrl) {
+      data.append('digitalFileUrl', formData.digitalFileUrl);
+      data.append('digitalFileName', formData.digitalFileName);
+      data.append('digitalFileSize', String(formData.digitalFileSize));
+      data.append('digitalFileMimeType', formData.digitalFileMimeType);
+    }
+    if (digitalFileCleared) {
+      data.append('digitalFileCleared', 'true');
+    }
+
     const regionalAvailability = formData.regionalAvailability
       .filter(r => r.available)
       .map(r => ({
@@ -153,8 +174,15 @@ export default function AdminProductsPage() {
       fallbackImage: product.fallbackImage,
       features: product.features || '[]',
       isFeatured: product.isFeatured || false,
+      isBestseller: product.isBestseller || false,
+      compareAtPrice: product.compareAtPrice?.toString() || '',
+      digitalFileUrl: product.digitalFileUrl || '',
+      digitalFileName: product.digitalFileName || '',
+      digitalFileSize: product.digitalFileSize || 0,
+      digitalFileMimeType: product.digitalFileMimeType || '',
       regionalAvailability: mergedRegions
     });
+    setDigitalFileCleared(false);
     setIsDialogOpen(true);
   };
 
@@ -168,6 +196,21 @@ export default function AdminProductsPage() {
       } catch (error) {
         console.error('Error deleting product:', error);
       }
+    }
+  };
+
+  const handleSyncCj = async (id: number) => {
+    try {
+      const result = await syncCjProduct(id);
+      if (result.success) {
+        alert('Price/stock synced from CJ Dropshipping.');
+        loadData();
+      } else {
+        alert(result.error || 'Failed to sync from CJ Dropshipping.');
+      }
+    } catch (error) {
+      console.error('Error syncing from CJ:', error);
+      alert('Failed to sync from CJ Dropshipping.');
     }
   };
 
@@ -197,6 +240,12 @@ export default function AdminProductsPage() {
       fallbackImage: '/placeholder.png',
       features: '[]',
       isFeatured: false,
+      isBestseller: false,
+      compareAtPrice: '',
+      digitalFileUrl: '',
+      digitalFileName: '',
+      digitalFileSize: 0,
+      digitalFileMimeType: '',
       regionalAvailability: REGIONS.map(r => ({
         region: r,
         available: true,
@@ -204,17 +253,33 @@ export default function AdminProductsPage() {
         currency: ''
       }))
     });
-  };
-
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+    setDigitalFileCleared(false);
   };
 
   const handleImageUpload = (image: any) => {
     setFormData(prev => ({ ...prev, image: image.url }));
+  };
+
+  const handleDigitalFileUpload = (file: { url: string; originalName: string; size: number; mimeType: string }) => {
+    setFormData(prev => ({
+      ...prev,
+      digitalFileUrl: file.url,
+      digitalFileName: file.originalName,
+      digitalFileSize: file.size,
+      digitalFileMimeType: file.mimeType,
+    }));
+    setDigitalFileCleared(false);
+  };
+
+  const handleDigitalFileRemove = () => {
+    setFormData(prev => ({
+      ...prev,
+      digitalFileUrl: '',
+      digitalFileName: '',
+      digitalFileSize: 0,
+      digitalFileMimeType: '',
+    }));
+    setDigitalFileCleared(true);
   };
 
   const handleRegionChange = (index: number, field: string, value: any) => {
@@ -279,7 +344,7 @@ export default function AdminProductsPage() {
                         setFormData(prev => ({
                           ...prev,
                           name,
-                          slug: prev.slug || generateSlug(name)
+                          slug: prev.slug || slugify(name)
                         }));
                       }}
                       required
@@ -385,6 +450,18 @@ export default function AdminProductsPage() {
                   </div>
                 </div>
 
+                <div>
+                  <label className="block text-sm font-medium mb-2">Digital Download File</label>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    The file buyers receive after purchase (e.g. firestick build, 3D model, game source, addon).
+                  </p>
+                  <FileUpload
+                    value={formData.digitalFileUrl ? { url: formData.digitalFileUrl, name: formData.digitalFileName, size: formData.digitalFileSize } : null}
+                    onUploadComplete={handleDigitalFileUpload}
+                    onRemove={handleDigitalFileRemove}
+                  />
+                </div>
+
                 <div className="flex items-center space-x-2">
                     <input
                       type="checkbox"
@@ -396,6 +473,33 @@ export default function AdminProductsPage() {
                     <label htmlFor="isFeatured" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                       Feature this product (Show on Homepage)
                     </label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="isBestseller"
+                      checked={formData.isBestseller}
+                      onChange={(e) => setFormData(prev => ({ ...prev, isBestseller: e.target.checked }))}
+                      className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <label htmlFor="isBestseller" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      Hot / Bestseller (Show in Hot Products on Homepage)
+                    </label>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Compare-at Price (optional)</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="Original price before discount"
+                    value={formData.compareAtPrice}
+                    onChange={(e) => setFormData(prev => ({ ...prev, compareAtPrice: e.target.value }))}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Set higher than the price above to show strikethrough pricing and appear in Discounted Products on the homepage.
+                  </p>
                 </div>
 
                 {/* Regional Availability Section */}
@@ -478,6 +582,11 @@ export default function AdminProductsPage() {
                           {product.category.name}
                         </span>
                       )}
+                      {product.sourceType === 'CJ' && (
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                          CJ · stock {product.stockQuantity}
+                        </span>
+                      )}
                       <span>/{product.slug}</span>
                     </div>
                     {/* Show active regions */}
@@ -506,6 +615,16 @@ export default function AdminProductsPage() {
                   >
                     <RefreshCw className="w-4 h-4" />
                   </Button>
+                  {product.sourceType === 'CJ' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleSyncCj(product.id)}
+                      title="Sync price/stock from CJ"
+                    >
+                      <Truck className="w-4 h-4" />
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
