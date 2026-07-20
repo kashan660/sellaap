@@ -7,10 +7,10 @@ import { useRouter } from "next/navigation";
 import { getPaymentSettings } from "@/lib/admin-actions-payment";
 import { useEffect, useState } from "react";
 import { createOrder, createPaddleCheckout } from "@/lib/actions/order";
-import { CreditCard, Banknote } from "lucide-react";
+import { CreditCard, Banknote, Minus, Plus, Trash2 } from "lucide-react";
 
 export default function CheckoutPage() {
-  const { items, cartTotal, clearCart } = useCart();
+  const { items, cartTotal, clearCart, removeItem, updateQuantity } = useCart();
   const { data: session } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -109,7 +109,34 @@ export default function CheckoutPage() {
               <div key={item.id} className="flex justify-between items-center">
                 <div className="flex items-center gap-4">
                   <div className="font-medium">{item.name}</div>
-                  <div className="text-sm text-muted-foreground">x{item.quantity}</div>
+                  <div className="flex items-center gap-2 border rounded-md">
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      disabled={item.quantity <= 1}
+                      className="p-1.5 hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <span className="text-sm w-4 text-center">{item.quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      className="p-1.5 hover:bg-muted"
+                      aria-label="Increase quantity"
+                    >
+                      <Plus size={14} />
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeItem(item.id)}
+                    className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
+                    aria-label="Remove item"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
                 <div>
                   <Price amount={item.price * item.quantity} baseCurrency={item.currency} />

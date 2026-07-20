@@ -153,87 +153,94 @@ export async function createPaddleCheckout(orderId: number) {
     return { error: "Paddle is not configured (missing PADDLE_API_KEY)." };
   }
 
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: {
-      user: { select: { id: true, email: true } },
-      items: { select: { productId: true, quantity: true } },
-    },
-  });
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        user: { select: { id: true, email: true } },
+        items: { select: { productId: true, quantity: true } },
+      },
+    });
 
-  if (!order) {
-    return { error: "Order not found" };
-  }
+    if (!order) {
+      return { error: "Order not found" };
+    }
 
-  const sessionUserId = Number(session.user.id);
-  if (session.user.role !== "ADMIN" && order.userId !== sessionUserId) {
-    return { error: "Unauthorized" };
-  }
+    const sessionUserId = Number(session.user.id);
+    if (session.user.role !== "ADMIN" && order.userId !== sessionUserId) {
+      return { error: "Unauthorized" };
+    }
 
-  const mappingEntries = await Promise.all(
-    order.items.map(async (item) => {
-      let map = await getPaddleMapByProductId(item.productId);
-      if (!map) {
-        const product = await prisma.product.findUnique({
-          where: { id: item.productId },
-          select: { id: true, name: true, description: true, price: true, currency: true },
-        });
-        if (product) {
-          try {
-            await syncProductToPaddleCatalog(product);
-            map = await getPaddleMapByProductId(item.productId);
-          } catch (syncError) {
-            console.error(`Paddle auto-sync failed for product ${item.productId}:`, syncError);
+    const mappingEntries = await Promise.all(
+      order.items.map(async (item) => {
+        let map = await getPaddleMapByProductId(item.productId);
+        if (!map) {
+          const product = await prisma.product.findUnique({
+            where: { id: item.productId },
+            select: { id: true, name: true, description: true, price: true, currency: true },
+          });
+          if (product) {
+            try {
+              await syncProductToPaddleCatalog(product);
+              map = await getPaddleMapByProductId(item.productId);
+            } catch (syncError) {
+              console.error(`Paddle auto-sync failed for product ${item.productId}:`, syncError);
+            }
           }
         }
-      }
-      return [item.productId, map?.paddlePriceId || ""] as const;
-    })
-  );
-  const priceMap = Object.fromEntries(mappingEntries) as Record<number, string>;
-  const missingMappings = order.items.filter((item) => !priceMap[item.productId]);
-  if (missingMappings.length > 0) {
-    return {
-      error: `Missing Paddle sync for product IDs: ${missingMappings.map((i) => i.productId).join(", ")}. Sync products in Admin > Products.`,
-    };
-  }
+        return [item.productId, map?.paddlePriceId || ""] as const;
+      })
+    );
+    const priceMap = Object.fromEntries(mappingEntries) as Record<number, string>;
+    const missingMappings = order.items.filter((item) => !priceMap[item.productId]);
+    if (missingMappings.length > 0) {
+      return {
+        error: `Missing Paddle sync for product IDs: ${missingMappings.map((i) => i.productId).join(", ")}. Sync products in Admin > Products.`,
+      };
+    }
 
-  const response = await fetch(`${getPaddleApiBaseUrl()}/transactions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${paddleApiKey}`,
-    },
-    body: JSON.stringify({
-      collection_mode: "automatic",
-      items: order.items.map((item) => ({
-        price_id: priceMap[item.productId],
-        quantity: item.quantity,
-      })),
-      customer: order.user?.email ? { email: order.user.email } : undefined,
-      custom_data: {
-        orderId: String(order.id),
+    const response = await fetch(`${getPaddleApiBaseUrl()}/transactions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${paddleApiKey}`,
       },
-    }),
-  });
+      body: JSON.stringify({
+        collection_mode: "automatic",
+        items: order.items.map((item) => ({
+          price_id: priceMap[item.productId],
+          quantity: item.quantity,
+        })),
+        customer: order.user?.email ? { email: order.user.email } : undefined,
+        custom_data: {
+          orderId: String(order.id),
+        },
+      }),
+    });
 
-  const payload = await response.json().catch(() => null);
-  if (!response.ok) {
-    const detail = payload?.error?.detail || payload?.error?.message || "Failed to create Paddle transaction";
-    return { error: detail };
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      const detail = payload?.error?.detail || payload?.error?.message || "Failed to create Paddle transaction";
+      console.error(`Paddle transaction creation failed for order ${orderId}:`, detail, payload);
+      return { error: detail };
+    }
+
+    const transactionId = payload?.data?.id as string | undefined;
+    const checkoutUrl = normalizeCheckoutUrl(payload?.data?.checkout?.url, transactionId);
+    if (!checkoutUrl) {
+      return { error: "Paddle transaction created but no checkout URL returned." };
+    }
+
+    return {
+      success: true,
+      checkoutUrl,
+      transactionId: transactionId || null,
+    };
+  } catch (error) {
+    console.error(`createPaddleCheckout failed for order ${orderId}:`, error);
+    const message = error instanceof Error ? error.message : "Failed to initialize Paddle checkout";
+    return { error: message };
   }
-
-  const transactionId = payload?.data?.id as string | undefined;
-  const checkoutUrl = normalizeCheckoutUrl(payload?.data?.checkout?.url, transactionId);
-  if (!checkoutUrl) {
-    return { error: "Paddle transaction created but no checkout URL returned." };
-  }
-
-  return {
-    success: true,
-    checkoutUrl,
-    transactionId: transactionId || null,
-  };
 }
 
 export async function createDirectPaddlePaymentLink(input: {

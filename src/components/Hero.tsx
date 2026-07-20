@@ -1,7 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowRight, ShoppingBag, Truck, Shield, Star, PawPrint, Sparkles, Cpu, Home, Car } from "lucide-react";
 
 const NICHES = [
@@ -87,10 +86,10 @@ export function Hero() {
                 <span className="text-white/60 text-sm">Secure payments with:</span>
                 <div className="flex gap-4">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2">
-                    <Image src="/images/paypal-logo.svg" alt="PayPal" width={60} height={20} className="h-5 w-auto" />
+                    <span className="text-white/80 text-sm font-medium">PayPal</span>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2">
-                    <Image src="/images/payoneer-logo.svg" alt="Payoneer" width={60} height={20} className="h-5 w-auto" />
+                    <span className="text-white/80 text-sm font-medium">Payoneer</span>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2">
                     <span className="text-white/80 text-sm font-medium">& More</span>
