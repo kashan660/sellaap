@@ -79,12 +79,17 @@ async function upsertPaddleMap(productId: number, paddleProductId: string, paddl
   `;
 }
 
+// Paddle's price `name` field has a hard 150-char limit - CJ product titles
+// are often long marketing copy, so appending " Price" can push a
+// already-long name over that limit and get the whole sync rejected.
+const PADDLE_PRICE_NAME_MAX = 150;
+
 async function createPaddlePrice(paddleProductId: string, product: ProductForSync) {
   const amount = String(Math.round(product.price * 100));
   const payload = await paddleFetch('/prices', {
     product_id: paddleProductId,
-    name: `${product.name} Price`,
-    description: `Auto-synced price for ${product.name}`,
+    name: `${product.name} Price`.slice(0, PADDLE_PRICE_NAME_MAX),
+    description: `Auto-synced price for ${product.name}`.slice(0, 250),
     unit_price: {
       amount,
       currency_code: product.currency || 'USD',
