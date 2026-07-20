@@ -81,6 +81,10 @@ export async function changePassword(currentPassword: string, newPassword: strin
     return { success: false, error: 'User not found' };
   }
 
+  if (!user.password) {
+    return { success: false, error: 'This account signed up with Google and has no password to change' };
+  }
+
   const isValid = await bcrypt.compare(currentPassword, user.password);
   if (!isValid) {
     return { success: false, error: 'Current password is incorrect' };
