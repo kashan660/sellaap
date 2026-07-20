@@ -1,5 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
@@ -34,6 +35,11 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
+          if (!user.password) {
+            console.error("Auth failed: Account has no password (sign in with Google instead):", credentials.email);
+            return null;
+          }
+
           const isPasswordValid = await bcrypt.compare(
             credentials.password,
             user.password
@@ -60,6 +66,10 @@ export const authOptions: NextAuthOptions = {
         }
       },
     }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
   ],
   callbacks: {
     async redirect({ url, baseUrl }) {
@@ -69,6 +79,32 @@ export const authOptions: NextAuthOptions = {
       }
       // Otherwise, use the default redirect behavior
       return url.startsWith(baseUrl) ? url : baseUrl;
+    },
+    async signIn({ user, account }) {
+      // Credentials sign-in already validated the user in `authorize`.
+      if (account?.provider === "credentials") {
+        return true;
+      }
+
+      // OAuth providers (Google, etc.) don't have a row in our own User
+      // table by default - find or create one keyed by email.
+      if (!user.email) {
+        return false;
+      }
+
+      const existing = await prisma.user.findUnique({ where: { email: user.email } });
+      if (!existing) {
+        await prisma.user.create({
+          data: {
+            email: user.email,
+            name: user.name ?? user.email.split("@")[0],
+            password: null,
+            role: "USER",
+          },
+        });
+      }
+
+      return true;
     },
     async session({ token, session }) {
       if (token) {
@@ -81,10 +117,15 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.role = user.role;
-        console.log('JWT callback - setting role:', user.role);
+      // Always resolve the real internal User row by email on sign-in, since
+      // OAuth providers hand back their own profile id (not ours) in `user.id`.
+      if (user?.email) {
+        const dbUser = await prisma.user.findUnique({ where: { email: user.email } });
+        if (dbUser) {
+          token.id = dbUser.id.toString();
+          token.role = dbUser.role;
+          token.name = dbUser.name;
+        }
       }
       return token;
     },
