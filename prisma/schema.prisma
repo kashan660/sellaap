@@ -21,6 +21,29 @@ model User {
   pages               Page[]                @relation("PageAuthor")
   images              Image[]               @relation("ImageUploader")
   passwordResetTokens PasswordResetToken[]
+  subscription        Subscription?
+}
+
+// Sellaap+ membership: a recurring Paddle subscription that gives the
+// customer a discount on every order. One active row per user - see
+// getActiveDiscountPercent() in lib/membership/tiers.ts for how the tier
+// maps to a discount, and the Paddle webhook handler for lifecycle updates.
+model Subscription {
+  id                     Int       @id @default(autoincrement())
+  userId                 Int       @unique
+  user                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier                   String // 'starter' | 'pro' | 'advanced'
+  billingPeriod          String // 'month' | 'year'
+  status                 String    @default("active") // active | past_due | paused | canceled
+  paddleSubscriptionId   String    @unique
+  paddleCustomerId       String
+  paddlePriceId          String
+  scheduledCancelAt      DateTime?
+  currentBillingPeriodEnd DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  @@index([paddleSubscriptionId])
 }
 
 model PasswordResetToken {

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { getPaymentSettings } from "@/lib/admin-actions-payment";
 import { useEffect, useState } from "react";
 import { createOrder, createPaddleCheckout } from "@/lib/actions/order";
+import { getMyMembershipDiscount } from "@/lib/actions/membership";
 import { CreditCard, Banknote, Minus, Plus, Trash2 } from "lucide-react";
 
 export default function CheckoutPage() {
@@ -16,7 +17,9 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [paymentSettings, setPaymentSettings] = useState<any>(null);
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+  const [discount, setDiscount] = useState<{ percent: number; tierName: string | null }>({ percent: 0, tierName: null });
   const requiresShipping = items.some((item) => item.sourceType === 'CJ');
+  const discountedTotal = Math.round(cartTotal * (1 - discount.percent / 100) * 100) / 100;
   const [shipping, setShipping] = useState({
     name: '',
     phone: '',
@@ -41,6 +44,7 @@ export default function CheckoutPage() {
     getPaymentSettings().then(res => {
         if(res.success) setPaymentSettings(res.data);
     });
+    getMyMembershipDiscount().then(setDiscount);
   }, []);
 
   if (items.length === 0) {
@@ -72,7 +76,7 @@ export default function CheckoutPage() {
 
     setLoading(true);
     try {
-      const result = await createOrder(items, cartTotal, selectedMethod, requiresShipping ? shipping : undefined);
+      const result = await createOrder(items, discountedTotal, selectedMethod, requiresShipping ? shipping : undefined);
       if (result.success) {
         if (selectedMethod === 'PADDLE') {
           const paddleResult = await createPaddleCheckout(result.orderId);
@@ -143,9 +147,21 @@ export default function CheckoutPage() {
                 </div>
               </div>
             ))}
-            <div className="border-t pt-4 flex justify-between items-center font-bold text-lg">
-              <span>Total</span>
-              <Price amount={cartTotal} baseCurrency="USD" />
+            <div className="border-t pt-4 space-y-1">
+              <div className="flex justify-between items-center text-sm text-muted-foreground">
+                <span>Subtotal</span>
+                <Price amount={cartTotal} baseCurrency="USD" />
+              </div>
+              {discount.percent > 0 && (
+                <div className="flex justify-between items-center text-sm text-green-600">
+                  <span>{discount.tierName} member discount ({discount.percent}%)</span>
+                  <span>-<Price amount={cartTotal - discountedTotal} baseCurrency="USD" /></span>
+                </div>
+              )}
+              <div className="flex justify-between items-center font-bold text-lg pt-1">
+                <span>Total</span>
+                <Price amount={discountedTotal} baseCurrency="USD" />
+              </div>
             </div>
           </div>
         </div>

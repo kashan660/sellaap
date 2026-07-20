@@ -3,21 +3,24 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
-declare global {
-  interface Window {
-    Paddle?: {
-      Initialize: (config: {
-        token: string;
-        checkout?: { settings: Record<string, unknown> };
-      }) => void;
-      Checkout?: {
-        open: (opts: {
-          transactionId: string;
-          settings?: Record<string, unknown>;
-        }) => void;
-      };
-    };
-  }
+// Loaded here via a raw <script> tag (not the @paddle/paddle-js package, which
+// also declares a global `Window.Paddle` - a second `declare global` here
+// would conflict with it), so this file just narrows `window.Paddle` locally.
+interface RawPaddleGlobal {
+  Initialize: (config: {
+    token: string;
+    checkout?: { settings: Record<string, unknown> };
+  }) => void;
+  Checkout?: {
+    open: (opts: {
+      transactionId: string;
+      settings?: Record<string, unknown>;
+    }) => void;
+  };
+}
+
+function getRawPaddle(): RawPaddleGlobal | undefined {
+  return (window as unknown as { Paddle?: RawPaddleGlobal }).Paddle;
 }
 
 const PADDLE_SCRIPT_SRC = "https://cdn.paddle.com/paddle/v2/paddle.js";
@@ -39,7 +42,7 @@ export function PaddlePayInitializer({
   const [paddleReady, setPaddleReady] = useState(false);
 
   const openTransactionCheckout = useCallback(() => {
-    const Paddle = window.Paddle;
+    const Paddle = getRawPaddle();
     if (!Paddle?.Checkout?.open) {
       console.error("Paddle.Checkout.open is not available yet.");
       return;
@@ -61,7 +64,7 @@ export function PaddlePayInitializer({
 
     const initOnce = () => {
       if (cancelled || initialized.current || typeof window === "undefined") return false;
-      const Paddle = window.Paddle;
+      const Paddle = getRawPaddle();
       if (!Paddle?.Initialize) return false;
       try {
         Paddle.Initialize({

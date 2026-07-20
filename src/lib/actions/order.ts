@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { getPaddleMapByProductId, syncProductToPaddleCatalog } from "@/lib/paddle-catalog";
 import { getPaddleApiBaseUrl } from "@/lib/paddle-api";
 import { fulfillOrderWithCj } from "@/lib/actions/cj";
+import { getActiveDiscountPercent } from "@/lib/membership/discount";
 
 function normalizeCheckoutUrl(rawUrl: string | null | undefined, transactionId: string | null | undefined) {
   if (rawUrl) {
@@ -99,8 +100,14 @@ export async function createOrder(items: any[], total: number, paymentMethod: st
       calculatedTotal += product.price * item.quantity;
     }
 
-    // Verify total matches calculated total (allow 1% variance for rounding)
-    const totalVariance = Math.abs(calculatedTotal - total) / calculatedTotal;
+    // Sellaap+ members get a discount on every order - apply it
+    // authoritatively here rather than trusting a client-submitted total.
+    const userId = parseInt(session.user.id);
+    const { percent: discountPercent } = await getActiveDiscountPercent(userId);
+    const discountedTotal = Math.round(calculatedTotal * (1 - discountPercent / 100) * 100) / 100;
+
+    // Verify total matches the (possibly discounted) calculated total (allow 1% variance for rounding)
+    const totalVariance = Math.abs(discountedTotal - total) / discountedTotal;
     if (totalVariance > 0.01) {
       return { error: "Total amount mismatch" };
     }
@@ -114,8 +121,8 @@ export async function createOrder(items: any[], total: number, paymentMethod: st
     // Create order with validated data
     const order = await prisma.order.create({
       data: {
-        userId: parseInt(session.user.id),
-        total: calculatedTotal,
+        userId,
+        total: discountedTotal,
         currency: "USD",
         status: "PENDING", // Changed to PENDING for manual payment verification
         paymentMethod: paymentMethod.toLowerCase(),
@@ -199,6 +206,11 @@ export async function createPaddleCheckout(orderId: number) {
       };
     }
 
+    // Apply the buyer's Sellaap+ discount (if any) as a real Paddle discount
+    // on the transaction, so the amount actually charged matches the
+    // discounted order.total computed in createOrder.
+    const { paddleDiscountId } = order.userId ? await getActiveDiscountPercent(order.userId) : { paddleDiscountId: null };
+
     const response = await fetch(`${getPaddleApiBaseUrl()}/transactions`, {
       method: "POST",
       headers: {
@@ -211,6 +223,7 @@ export async function createPaddleCheckout(orderId: number) {
           price_id: priceMap[item.productId],
           quantity: item.quantity,
         })),
+        ...(paddleDiscountId ? { discount_id: paddleDiscountId } : {}),
         customer: order.user?.email ? { email: order.user.email } : undefined,
         custom_data: {
           orderId: String(order.id),
