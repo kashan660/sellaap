@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import Image from "next/image";
 import { AddToCartButton } from "@/components/AddToCartButton";
+import { ProductCard } from "@/components/ProductCard";
 import { ProductGallery } from "@/components/ProductGallery";
 import { generateProductMeta, generateProductStructuredData, generateCategoryMeta, generateBreadcrumbStructuredData, getSiteUrl } from "@/lib/seo-utils";
 import Script from "next/script";
@@ -240,6 +241,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     // Render category page
     const products = await prisma.product.findMany({
       where: { categoryId: category.id },
+      include: { category: true, regionalAvailability: true },
       orderBy: { createdAt: 'desc' }
     });
 
@@ -253,23 +255,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
 
         {products.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product: any) => (
-              <div key={product.id} className="bg-card border rounded-lg p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
-                <p className="text-muted-foreground mb-4">{product.description}</p>
-                <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold text-primary">
-                    ${product.price}
-                  </span>
-                  <Link 
-                    href={`/products/${product.slug}`}
-                    className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
-                  >
-                    View Product
-                  </Link>
-                </div>
-              </div>
+          <div className="grid gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
+            {products.map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                imagePriority={index < 3}
+              />
             ))}
           </div>
         ) : (
